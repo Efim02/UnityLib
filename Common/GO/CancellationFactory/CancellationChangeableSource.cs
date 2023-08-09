@@ -9,7 +9,7 @@
     /// <remarks>
     /// Оболочка источника, в которой можно зарегистрировать действия по event, и вызвать их после отмены.
     /// </remarks>
-    public sealed class CancellationChangeableSource
+    internal sealed class CancellationChangeableSource
     {
         /// <summary>
         /// Источник токена.

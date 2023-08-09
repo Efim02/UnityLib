@@ -5,7 +5,7 @@
     using UnityEngine;
 
     /// <summary>
-    /// Свойство с привязкой.
+    /// Свойство с привязкой, с использованием <see cref="Value"/>.
     /// </summary>
     /// <typeparam name="T"> Тип значения. </typeparam>
     public class BindingProperty<T>
