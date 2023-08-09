@@ -6,7 +6,7 @@
     /// <summary>
     /// Фабрика токенов для отмены задач.
     /// </summary>
-    public sealed class CancellationTokenFactory
+    internal sealed class CancellationTokenFactory
     {
         /// <summary>
         /// Словарь изменяемых токенов.
