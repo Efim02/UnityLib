@@ -2,7 +2,7 @@
 {
     using System;
 
-    using UnityLib.Common.GO.Logger;
+    using UnityLib.Log;
 
     /// <summary>
     /// Исключение об ошибке поиска.

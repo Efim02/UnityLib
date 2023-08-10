@@ -4,8 +4,7 @@
 
     using UnityEngine;
 
-    using UnityLib.Common;
-    using UnityLib.Common.GO.Logger;
+    using UnityLib.Log;
 
     /// <summary>
     /// Абстракция представления для модели.
@@ -27,7 +26,7 @@
             if (model is not TModel tModel)
             {
                 GameLogger.Error($"Ошибка привязки Model-View: {model.GetType().Name} " +
-                                 $"не является {typeof(TModel).Name}.");
+                             $"не является {typeof(TModel).Name}.");
                 return;
             }
 
@@ -77,7 +76,7 @@
             if (model is not TModel tModel)
             {
                 GameLogger.Error($"Ошибка привязки Model-View: {model.GetType().Name} " +
-                                 $"не является {typeof(TModel).Name}.");
+                             $"не является {typeof(TModel).Name}.");
                 return;
             }
 

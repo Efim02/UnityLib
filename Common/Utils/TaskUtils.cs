@@ -4,7 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    using UnityLib.Common.GO.Logger;
+    using UnityLib.Log;
 
     /// <summary>
     /// Расширение для задач.

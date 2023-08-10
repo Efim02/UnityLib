@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Common.GO.Dependecy
+﻿namespace UnityLib.Di
 {
     /// <summary>
     /// Интерфейс обработки уничтожения объекта.

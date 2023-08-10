@@ -12,12 +12,13 @@
         /// <summary>
         /// Представление. Указывается в Ui.
         /// </summary>
-        public List<IView> Views;
+        [SerializeField]
+        private List<IView> _views;
 
         /// <inheritdoc />
         public void SetVisibleView(bool visible)
         {
-            foreach (var view in Views)
+            foreach (var view in _views)
             {
                 view.IsVisible = visible;
             }
@@ -28,7 +29,7 @@
         /// </summary>
         public void UpdateView()
         {
-            foreach (var view in Views)
+            foreach (var view in _views)
             {
                 view.UpdateView(this);
                 view.IsVisible = true;

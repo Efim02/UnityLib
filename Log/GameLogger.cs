@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Common.GO.Logger
+﻿namespace UnityLib.Log
 {
     using System;
     using System.IO;

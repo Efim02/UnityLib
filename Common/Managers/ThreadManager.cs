@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Common.GO
+﻿namespace UnityLib.Common.Managers
 {
     using System;
     using System.Collections.Generic;
@@ -6,9 +6,10 @@
 
     using UnityEngine;
 
-    using UnityLib.Common.GO.Dependecy;
-    using UnityLib.Common.GO.Logger;
     using UnityLib.Common.Utils;
+    using UnityLib.Di;
+    using UnityLib.Log;
+    using UnityLib.Scene;
 
     /// <summary>
     /// Синхронизатор с потоком Unity.

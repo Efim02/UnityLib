@@ -8,11 +8,6 @@
     public class SingleModel : IModel, IDisposable
     {
         /// <summary>
-        /// Представление.
-        /// </summary>
-        public IView View { get; }
-
-        /// <summary>
         /// Конструктор по умолчанию.
         /// </summary>
         public SingleModel()
@@ -36,6 +31,11 @@
         /// Это модель одной сцены.
         /// </summary>
         public virtual bool IsSceneModel => false;
+
+        /// <summary>
+        /// Представление.
+        /// </summary>
+        public IView View { get; }
 
         /// <summary>
         /// Уничтожить объект, чтобы создать новые его копии.
