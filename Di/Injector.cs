@@ -1,13 +1,14 @@
-﻿namespace UnityLib.Common.GO.Dependecy
+﻿namespace UnityLib.Di
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
     using UnityLib.Common.Exceptions;
-    using UnityLib.Common.GO.CancellationFactory;
-    using UnityLib.Common.GO.Logger;
     using UnityLib.Common.Utils;
+    using UnityLib.Di.CancellationFactory;
+    using UnityLib.Log;
+    using UnityLib.Scene;
 
     /// <summary>
     /// Инжектор зависимостей.
@@ -38,15 +39,6 @@
         /// <c> Ключ: тип объекта; Значение: является объектом одной сцены, необходимые типы параметров. </c>
         /// </summary>
         private static readonly List<PickyInstance> _pickyInstances;
-
-        /// <summary>
-        /// Использовать изменитель уровней.
-        /// </summary>
-        /// <param name="levelChanger">Измени</param>
-        public static void UseLevelChanger(ILevelChanger levelChanger)
-        {
-            levelChanger.LevelLoading += SceneChanged;
-        } 
 
         /// <summary>
         /// Инжектор зависимостей.
@@ -227,6 +219,15 @@
         public static void RemoveSceneObject<T>()
         {
             _dictionaryScene.Remove(typeof(T));
+        }
+
+        /// <summary>
+        /// Использовать изменитель уровней.
+        /// </summary>
+        /// <param name="levelChanger"> Измени </param>
+        public static void UseLevelChanger(ILevelChanger levelChanger)
+        {
+            levelChanger.LevelLoading += SceneChanged;
         }
 
         /// <summary>

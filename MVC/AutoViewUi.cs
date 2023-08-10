@@ -17,6 +17,20 @@
         /// </summary>
         public abstract bool IsNeedUpdateView { get; }
 
+        protected void Awake()
+        {
+            InitializeView();
+        }
+
+        /// <summary>
+        /// Удаление объекта, и удаление представления, для модели.
+        /// </summary>
+        /// <remarks> Этого не произойдет если представление ни разу не будет активировано. </remarks>
+        public virtual void OnDestroy()
+        {
+            ViewModelConnector.RemoveView<TModel>(this);
+        }
+
         /// <summary>
         /// Создание объекта, и добавление представления, для модели.
         /// </summary>
@@ -35,20 +49,6 @@
 
             ViewModelConnector.AddView<TModel>(this);
             InitializeAutoView();
-        }
-
-        /// <summary>
-        /// Удаление объекта, и удаление представления, для модели.
-        /// </summary>
-        /// <remarks> Этого не произойдет если представление ни разу не будет активировано. </remarks>
-        public virtual void OnDestroy()
-        {
-            ViewModelConnector.RemoveView<TModel>(this);
-        }
-
-        protected void Awake()
-        {
-            InitializeView();
         }
 
         /// <summary>

@@ -5,7 +5,7 @@
     using System.Text;
     using System.Xml.Serialization;
 
-    using UnityLib.Common.GO.Logger;
+    using UnityLib.Log;
 
     public static class XmlUtils
     {
@@ -32,7 +32,7 @@
             catch (Exception exception)
             {
                 GameLogger.Warning($"Не удалось получить объект {typeof(T)} из xml файла." +
-                                   $"\nСообщение: {exception.Message}.");
+                               $"\nСообщение: {exception.Message}.");
                 return null;
             }
         }
@@ -54,7 +54,7 @@
             catch (Exception exception)
             {
                 GameLogger.Warning($"Не удалось получить объект {typeof(T)} из xml файла." +
-                                   $"\nСообщение: {exception.Message}.");
+                               $"\nСообщение: {exception.Message}.");
                 return null;
             }
         }
@@ -89,7 +89,7 @@
             catch (Exception exception)
             {
                 GameLogger.Warning($"Не удалось получить xml {typeof(T)} из объекта." +
-                                   $"\nСообщение: {exception.Message}.");
+                               $"\nСообщение: {exception.Message}.");
                 return null;
             }
         }

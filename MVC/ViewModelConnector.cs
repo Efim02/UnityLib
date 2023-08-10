@@ -6,9 +6,10 @@
 
     using UnityEngine;
 
-    using UnityLib.Common.GO.Dependecy;
-    using UnityLib.Common.GO.Logger;
     using UnityLib.Common.Utils;
+    using UnityLib.Di;
+    using UnityLib.Log;
+    using UnityLib.Scene;
 
     /// <summary>
     /// Связыватель конкретной одной модели и ее представлений.
@@ -61,8 +62,8 @@
             if (views.Contains(view) && views.Count > 1)
             {
                 GameLogger.Warning($"Это представление уже было добавлено {typeof(TModel)}." +
-                                   $"\nКоличество: {views.Count}, Существует: " +
-                                   $"{views.Cast<MonoBehaviour>().Count(mn => !MonoUtils.IsDestroyed(mn))}");
+                               $"\nКоличество: {views.Count}, Существует: " +
+                               $"{views.Cast<MonoBehaviour>().Count(mn => !MonoUtils.IsDestroyed(mn))}");
                 return;
             }
 
@@ -80,7 +81,7 @@
             if (!_modelsDictionary.TryGetValue(typeof(TModel), out var model))
             {
                 GameLogger.Error($"Не удалось установить модель {typeof(TModel).Name} " +
-                                 $"для представления {view.GetType().Name}.");
+                             $"для представления {view.GetType().Name}.");
                 return null;
             }
 

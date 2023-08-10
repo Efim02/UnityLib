@@ -4,13 +4,12 @@
 
     using UnityEngine;
 
-    using UnityLib.Common;
-    using UnityLib.Common.GO.Logger;
+    using UnityLib.Log;
 
     /// <summary>
-    /// Абстракция сервиса.
+    /// Абстракция контроллера отвечающего за события из вне.
     /// </summary>
-    public class ServiceUi : MonoBehaviour
+    public class ControllerUi : MonoBehaviour
     {
         /// <summary>
         /// Выполнить безопасно Action.

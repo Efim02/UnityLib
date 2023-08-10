@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Common.GO.CancellationFactory
+﻿namespace UnityLib.Di.CancellationFactory
 {
     using System.Collections.Generic;
     using System.Threading;

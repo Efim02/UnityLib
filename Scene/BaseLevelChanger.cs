@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Common.GO.Dependecy
+﻿namespace UnityLib.Scene
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
 
     using UnityEngine.SceneManagement;
 
-    using UnityLib.Common.GO.Logger;
+    using UnityLib.Log;
 
     /// <summary>
     /// Изменитель уровней.
