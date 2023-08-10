@@ -51,7 +51,7 @@
             _pickyInstances = new List<PickyInstance>();
 
 #if UNITY_EDITOR
-            AppUtils.Quiting += SceneChanged;
+            AppManager.Quiting += SceneChanged;
 #endif
         }
 
@@ -162,7 +162,7 @@
         /// <typeparam name="TSource"> Тип по которому будем запрашивать. </typeparam>
         /// <param name="source"> Что вернется. Если NULL создадим через Activator. </param>
         /// <param name="existsOnScene"> Существует одну сцену. </param>
-        public static void RebindSingleton<TSource>(object source, bool existsOnScene)
+        public static void RebindSingleton<TSource>(TSource source, bool existsOnScene)
             where TSource : class
         {
             if (source is null)
@@ -175,7 +175,6 @@
                 throw new ErrorFoundException($"Зависимость типа {typeof(TSource).Name} уже зарегистрирована.");
 
             // Не удалять object, чтобы был контроль (ключа) типа абстракции.
-            source = (TSource)source;
             AddSourceInDictionaries(typeof(TSource), source, existsOnScene);
         }
 

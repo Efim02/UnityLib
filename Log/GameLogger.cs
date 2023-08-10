@@ -34,7 +34,7 @@
             var stream = new FileStream(FileLogPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             StreamWriter = new StreamWriter(stream);
 
-            AppUtils.Quiting += Save;
+            AppManager.Quiting += Save;
         }
 
         /// <summary>

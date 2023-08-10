@@ -4,11 +4,18 @@
 
     using UnityEngine;
 
+    using UnityLib.Di;
+
     /// <summary>
     /// Управляющий приложением.
     /// </summary>
-    public class AppUtils : MonoBehaviour
+    public class AppManager : MonoBehaviour
     {
+        public void Awake()
+        {
+            Injector.RebindSingleton(this, false);
+        }
+
 #if UNITY_EDITOR
         /// <summary>
         /// Вызываем так, иначе не отработает в Editor.
