@@ -8,7 +8,7 @@
 
     using UnityLib.Architecture.Di;
     using UnityLib.Architecture.Log;
-    using UnityLib.Core.Managers.Scene;
+    using UnityLib.Core.Models.Level;
     using UnityLib.Core.Utils;
 
     /// <summary>
