@@ -2,11 +2,17 @@
 My unity lib with architecture solutions. 
 Либа с архитектурными решениями для Unity. 
 
+## Общее
+
+#### Работа с ошибками
+- Не создаем исключений в коде
+- Работаем с обработкой ошибок через GameLogger
+- Пишем отказоустойчевый код
 
 #### Постфиксы
 - Controller - синглтон на сцене, удаляемый при перезагруке сцены.
 - Manager - синглтон на сцене.
-- Service - синглтон.
+- Model-Service - синглтон. В нашем случае это одно и тоже, т.к. создаются толстые модели, которые необходимы в разработке.
 - Moderator - статичный класс с методами и полями.
 - Utils - утилита.
 - Worker - живет время выполнения операции.
@@ -71,7 +77,7 @@ Replica - копия объекта, управляемая другим игр�
   События имеют свойство применяться, побочное сохранять информацию.
 
 #### MVC
-+ ControllerUi - содержат код, для взаимодействия с Model.
++ ControlUi - содержат код, для взаимодействия с Model.
 + IView - представление, которое может обновляться.
 + IModel - модель, которая слабосвязана с IView.
 
@@ -79,15 +85,15 @@ Replica - копия объекта, управляемая другим игр�
 
 #### Генераторы кода
 
-##### Пример ControllerUi
+###### Пример ControlUi
 
 ``` C#
     // Полностью регенировать все контроллеры.
     [MenuItem("Игра/Генераторы кода/Удалить контроллеры Ui")]
-    public static void DeleteControllerUis()
+    public static void DeleteControlUis()
     {
-        var controllerUiGenerator = new ControllerUiGenerator(new ControllerUiData());
-        controllerUiGenerator.DeleteServiceUis();
+        var controlUiGenerator = new ControlUiGenerator(new ControlUiData());
+        controlUiGenerator.DeleteServiceUis();
         AssetDatabase.Refresh();
 
         CompilationPipeline.RequestScriptCompilation();
@@ -95,11 +101,11 @@ Replica - копия объекта, управляемая другим игр�
 
     // Запустисть генератор контроллеров.
     [MenuItem("Игра/Генераторы кода/Генерировать контроллеры Ui")]
-    public static void GenerateControllerUis()
+    public static void GenerateControlUis()
     {
-        var controllerUiGenerator = new ControllerUiGenerator(new ControllerUiData());
-        controllerUiGenerator.HasChanges();
-        controllerUiGenerator.Generate();
+        var controlUiGenerator = new ControlUiGenerator(new ControlUiData());
+        controlUiGenerator.HasChanges();
+        controlUiGenerator.Generate();
     }
     
     // Стартовый метод, для всех генераторов.

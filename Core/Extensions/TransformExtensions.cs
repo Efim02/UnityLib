@@ -10,6 +10,20 @@
     public static class TransformExtensions
     {
         /// <summary>
+        /// Получает всех наследников у текущего объекта, и рекурсивно у всех его наследников.
+        /// </summary>
+        /// <param name="transform"> Трансформ. </param>
+        /// <returns> Список всех объектов (имеющихся в иерархии указанного объекта) начиная с запрошенного. </returns>
+        /// <remarks> Сам указанный объект тоже добавляется в список. </remarks>
+        public static List<Transform> GetAllFromHierarchy(this Transform transform)
+        {
+            var transforms = new List<Transform> { transform };
+            transforms.AddRange(transform.GetChildrenRecursive());
+
+            return transforms;
+        }
+
+        /// <summary>
         /// Получить потомков.
         /// </summary>
         /// <returns> Список потомков, на один уровень. </returns>
@@ -20,6 +34,22 @@
             {
                 var child = transform.GetChild(index);
                 children.Add(child);
+            }
+
+            return children;
+        }
+
+        /// <summary>
+        /// Получает всех наследников у текущего объекта, и рекурсивно у всех его наследников.
+        /// </summary>
+        /// <param name="transform"> Трансформ. </param>
+        /// <returns> Список всех объектов (имеющихся в иерархии указанного объекта) начиная с запрошенного. </returns>
+        private static IEnumerable<Transform> GetChildrenRecursive(this Transform transform)
+        {
+            var children = transform.GetChildren();
+            foreach (var child in children)
+            {
+                children.AddRange(child.GetChildrenRecursive());
             }
 
             return children;

@@ -1,19 +1,12 @@
 ﻿namespace UnityLib.Editor.CodeGenerator
 {
     using System;
-    using System.Linq;
-    using System.Reflection;
 
     /// <summary>
     /// Базовый класс генератора.
     /// </summary>
     public abstract class GeneratorBase
     {
-        /// <summary>
-        /// Название сборки, с типами которой работаем.
-        /// </summary>
-        public abstract string AssemblyName { get; }
-
         /// <summary>
         /// Данные закешированы ли.
         /// </summary>
@@ -38,15 +31,6 @@
             if (!IsCached)
                 throw new Exception("Генератор не проверил изменения.");
             Generate();
-        }
-
-        /// <summary>
-        /// Получить сборку по <see cref="AssemblyName" />.
-        /// </summary>
-        /// <returns> Сборка. </returns>
-        protected Assembly GetAssembly()
-        {
-            return AppDomain.CurrentDomain.GetAssemblies().First(a => a.ManifestModule.ScopeName == AssemblyName);
         }
     }
 }
