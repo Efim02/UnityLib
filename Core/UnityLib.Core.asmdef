@@ -1,0 +1,16 @@
+{
+    "name": "UnityLib.Core",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5c291bbb26d54a14aa74367e147ee99f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
