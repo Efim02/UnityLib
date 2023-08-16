@@ -8,6 +8,7 @@
     using System.Text;
 
     using UnityEditor;
+    using UnityEditor.Compilation;
 
     using UnityEngine;
 
@@ -17,17 +18,22 @@
     /// <summary>
     /// Генератор контроллеров для удобного использования.
     /// </summary>
-    public class ControlUiGenerator : GeneratorBase
+    public class ControlUiGenerator
     {
+        /// <summary>
+        /// Интерфейсы контроллеров.
+        /// </summary>
+        private readonly List<Type> _abstractions;
+
         /// <summary>
         /// Данные по контроллерам Ui.
         /// </summary>
         private readonly ControlUiData _controlUiData;
 
         /// <summary>
-        /// Интерфейсы контроллеров.
+        /// Реализации UI контроллеров.
         /// </summary>
-        private Type[] _serviceInterfaces;
+        private readonly List<Type> _controlUis;
 
         /// <summary>
         /// Генератор контроллеров для удобного использования.
@@ -36,17 +42,42 @@
         public ControlUiGenerator(ControlUiData controlUiData)
         {
             _controlUiData = controlUiData;
+
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => a.ExportedTypes).ToList();
+            _abstractions = types
+                .Where(t => t.FullName!
+                    .Contains(_controlUiData.NamespaceAbstractions))
+                .ToList();
+            _controlUis = types
+                .Where(t => t.FullName!
+                    .Contains(_controlUiData.NamespaceControlUis))
+                .ToList();
         }
-        
-        /// <inheritdoc />
-        public override bool IsCached { get; set; }
+
+        /// <summary>
+        /// Проверить и генерировать отсутствующие классы.
+        /// </summary>
+        public void CheckAndGenerate()
+        {
+            var abstractions = _abstractions.Where(a => _controlUis.Any(c => c.IsSubclassOf(a))).ToList();
+            if (!abstractions.Any())
+            {
+                GameLogger.Info("Новые контролы отсутствуют");
+                return;
+            }
+
+            GameLogger.Info($"Генерировать недостающие контроллеры Ui: {abstractions.Count}.");
+
+            Generate(abstractions);
+        }
 
         /// <summary>
         /// Удалить контроллеры Ui.
         /// </summary>
         public void DeleteServiceUis()
         {
-            var pathServicesUi = Path.Combine(Application.dataPath, _controlUiData.ControllerUisPath);
+            var pathServicesUi = Path.Combine(Application.dataPath, _controlUiData.ControlUisPath);
             foreach (var pathServiceUi in Directory.GetFiles(pathServicesUi))
             {
                 File.Delete(pathServiceUi);
@@ -56,79 +87,39 @@
         /// <summary>
         /// Генерация классов.
         /// </summary>
-        public override void Generate()
+        public void Regenerate()
         {
-            GameLogger.Info($"Генерация контроллеров Ui {nameof(ControlUiGenerator)}: {_serviceInterfaces.Length}.");
-
-            foreach (var serviceInterace in _serviceInterfaces)
-            {
-                var nameService = Path.GetFileNameWithoutExtension(serviceInterace.Name).Substring(1);
-                var nameServiceUi = $"{nameService}Ui";
-
-                var pathRelative = $"{_controlUiData.ControllerUisPath}/{nameServiceUi}.cs";
-                var pathServiceUi = $"{Application.dataPath}/{pathRelative}";
-
-                using (var streamWriter = new StreamWriter(pathServiceUi, false, Encoding.UTF8))
-                {
-                    var generatorHelper = new GeneratorHelper(streamWriter);
-                    GenerateFileCs(nameService, nameServiceUi, serviceInterace, generatorHelper);
-                }
-
-                var pathAssetsRelative = $"Assets/{pathRelative}";
-                AssetDatabase.ImportAsset(pathAssetsRelative);
-            }
-        }
-
-        /// <inheritdoc />
-        public override bool HasChanges()
-        {
-            IsCached = true;
-
-            var servicesTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.ExportedTypes)
-                .Where(t => t.FullName!.Contains(_controlUiData.NamespaceControllers)).ToList();
-
-            _serviceInterfaces = servicesTypes
-                .Where(t => t.Namespace == _controlUiData.NamespaceControllerAbstractions)
-                .ToArray();
-            var serviceUis = servicesTypes.Where(t => t.Namespace == _controlUiData.NamespaceControllerUI).ToArray();
-
-            var serviceInterfacesResult = new List<Type>();
-            // Проверяем надо ли обновлять файлы.
-            foreach (var serviceInterface in _serviceInterfaces)
-            {
-                var serviceUi = serviceUis.FirstOrDefault(sui => sui.GetInterface(serviceInterface.Name) != null);
-                if (serviceUi == null)
-                    serviceInterfacesResult.Add(serviceInterface);
-
-                // Не умеет получать новые методы, без рекомпиляции.
-                //var serviceUiMethods = serviceUi.GetMethods();
-                //var needAdd = serviceInterface.GetMethods().All(im => serviceUiMethods.Any(sm =>
-                //{
-                //    var equalsNames = im.Name == sm.Name;
-                //    var eqaulsParams = im.GetParameters().Length == sm.GetParameters().Length;
-                //    return eqaulsParams && equalsNames;
-                //}));
-
-                //if (!needAdd)
-                //    serviceInterfacesResult.Add(serviceInterface);
-            }
-
-            _serviceInterfaces = serviceInterfacesResult.ToArray();
-            return _serviceInterfaces.Any();
+            GameLogger.Info($"Регенерация контроллеров Ui: {_abstractions.Count}.");
+            Generate(_abstractions);
         }
 
         /// <summary>
-        /// Устновить интерфейсы.
+        /// Генерирует по абстракциям файлы контролов Ui.
         /// </summary>
-        public void SetInterfaces()
+        /// <param name="abstractions"> Абстракции. </param>
+        private void Generate(List<Type> abstractions)
         {
-            var servicesTypes =
-                AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.ExportedTypes)
-                    .Where(t => t.FullName!.Contains(_controlUiData.NamespaceControllers));
+            foreach (var abstraction in abstractions)
+            {
+                var controlName = Path.GetFileNameWithoutExtension(abstraction.Name).Substring(1);
+                var controlUiName = $"{controlName}Ui";
 
-            _serviceInterfaces = servicesTypes
-                .Where(t => t.Namespace == _controlUiData.NamespaceControllerAbstractions)
-                .ToArray();
+                var relativeControlUiPath = $"{_controlUiData.ControlUisPath}/{controlUiName}.cs";
+                var controlUiPath = $"{Application.dataPath}/{relativeControlUiPath}";
+
+                Directory.CreateDirectory(Path.GetDirectoryName(controlUiPath)!);
+                using (var streamWriter = new StreamWriter(controlUiPath, false, Encoding.UTF8))
+                {
+                    var generatorHelper = new GeneratorHelper(streamWriter);
+                    GenerateFileCs(controlName, controlUiName, abstraction, generatorHelper);
+                }
+
+                var pathAssetsRelative = $"Assets/{relativeControlUiPath}";
+                AssetDatabase.ImportAsset(pathAssetsRelative);
+            }
+
+            AssetDatabase.Refresh();
+            CompilationPipeline.RequestScriptCompilation();
         }
 
         /// <summary>
@@ -141,10 +132,10 @@
         private void GenerateFileCs(string nameService, string nameServiceUi, Type abstraction,
             GeneratorHelper generatorHelper)
         {
-            generatorHelper.NamespaceOpen(_controlUiData.NamespaceControllerUI);
+            generatorHelper.NamespaceOpen(_controlUiData.NamespaceControlUis);
             generatorHelper.Using(_controlUiData.NamespaceMvc);
-            generatorHelper.Using(_controlUiData.NamespaceControllerAbstractions);
-            generatorHelper.Using(_controlUiData.NamespaceController);
+            generatorHelper.Using(_controlUiData.NamespaceAbstractions);
+            generatorHelper.Using(_controlUiData.NamespaceImplementations);
 
             generatorHelper.ClassOpen(nameServiceUi, $"{nameof(ControlUi)}, {abstraction.Name}");
             generatorHelper.ConstWriteLine("string", $"\"Ошибка контроллера {nameServiceUi}\"");
