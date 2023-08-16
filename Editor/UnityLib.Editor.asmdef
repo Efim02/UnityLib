@@ -1,0 +1,19 @@
+{
+    "name": "UnityLib.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:c84f7274d027dae4082de27f5e9702d6",
+        "GUID:5c291bbb26d54a14aa74367e147ee99f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
