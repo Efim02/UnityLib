@@ -7,9 +7,9 @@
     using UnityLib.Architecture.Log;
 
     /// <summary>
-    /// Абстракция контроллера отвечающего за события из вне.
+    /// Абстракция контрола (элемента управления) отвечающего за события из вне.
     /// </summary>
-    public class ControllerUi : MonoBehaviour
+    public class ControlUi : MonoBehaviour
     {
         /// <summary>
         /// Выполнить безопасно Action.

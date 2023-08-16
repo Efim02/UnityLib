@@ -17,12 +17,12 @@
     /// <summary>
     /// Генератор контроллеров для удобного использования.
     /// </summary>
-    public class ControllerUiGenerator : GeneratorBase
+    public class ControlUiGenerator : GeneratorBase
     {
         /// <summary>
         /// Данные по контроллерам Ui.
         /// </summary>
-        private readonly ControllerUiData _controllerUiData;
+        private readonly ControlUiData _controlUiData;
 
         /// <summary>
         /// Интерфейсы контроллеров.
@@ -32,15 +32,12 @@
         /// <summary>
         /// Генератор контроллеров для удобного использования.
         /// </summary>
-        /// <param name="controllerUiData"> Данные по контроллерам Ui. </param>
-        public ControllerUiGenerator(ControllerUiData controllerUiData)
+        /// <param name="controlUiData"> Данные по контроллерам Ui. </param>
+        public ControlUiGenerator(ControlUiData controlUiData)
         {
-            _controllerUiData = controllerUiData;
+            _controlUiData = controlUiData;
         }
-
-        /// <inheritdoc />
-        public override string AssemblyName => "Assembly-CSharp.dll";
-
+        
         /// <inheritdoc />
         public override bool IsCached { get; set; }
 
@@ -49,7 +46,7 @@
         /// </summary>
         public void DeleteServiceUis()
         {
-            var pathServicesUi = Path.Combine(Application.dataPath, _controllerUiData.ControllerUisPath);
+            var pathServicesUi = Path.Combine(Application.dataPath, _controlUiData.ControllerUisPath);
             foreach (var pathServiceUi in Directory.GetFiles(pathServicesUi))
             {
                 File.Delete(pathServiceUi);
@@ -61,14 +58,14 @@
         /// </summary>
         public override void Generate()
         {
-            GameLogger.Info($"Генерация контроллеров Ui {nameof(ControllerUiGenerator)}: {_serviceInterfaces.Length}.");
+            GameLogger.Info($"Генерация контроллеров Ui {nameof(ControlUiGenerator)}: {_serviceInterfaces.Length}.");
 
             foreach (var serviceInterace in _serviceInterfaces)
             {
                 var nameService = Path.GetFileNameWithoutExtension(serviceInterace.Name).Substring(1);
                 var nameServiceUi = $"{nameService}Ui";
 
-                var pathRelative = $"{_controllerUiData.ControllerUisPath}/{nameServiceUi}.cs";
+                var pathRelative = $"{_controlUiData.ControllerUisPath}/{nameServiceUi}.cs";
                 var pathServiceUi = $"{Application.dataPath}/{pathRelative}";
 
                 using (var streamWriter = new StreamWriter(pathServiceUi, false, Encoding.UTF8))
@@ -87,14 +84,13 @@
         {
             IsCached = true;
 
-            var assembly = GetAssembly();
-            var servicesTypes = assembly.ExportedTypes.Where(t => 
-                t.FullName!.Contains(_controllerUiData.NamespaceControllers)).ToList();
+            var servicesTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.ExportedTypes)
+                .Where(t => t.FullName!.Contains(_controlUiData.NamespaceControllers)).ToList();
 
             _serviceInterfaces = servicesTypes
-                .Where(t => t.Namespace == _controllerUiData.NamespaceControllerAbstractions)
+                .Where(t => t.Namespace == _controlUiData.NamespaceControllerAbstractions)
                 .ToArray();
-            var serviceUis = servicesTypes.Where(t => t.Namespace == _controllerUiData.NamespaceControllerUI).ToArray();
+            var serviceUis = servicesTypes.Where(t => t.Namespace == _controlUiData.NamespaceControllerUI).ToArray();
 
             var serviceInterfacesResult = new List<Type>();
             // Проверяем надо ли обновлять файлы.
@@ -126,12 +122,12 @@
         /// </summary>
         public void SetInterfaces()
         {
-            var assembly = GetAssembly();
             var servicesTypes =
-                assembly.ExportedTypes.Where(t => t.FullName!.Contains(_controllerUiData.NamespaceControllers));
+                AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.ExportedTypes)
+                    .Where(t => t.FullName!.Contains(_controlUiData.NamespaceControllers));
 
             _serviceInterfaces = servicesTypes
-                .Where(t => t.Namespace == _controllerUiData.NamespaceControllerAbstractions)
+                .Where(t => t.Namespace == _controlUiData.NamespaceControllerAbstractions)
                 .ToArray();
         }
 
@@ -145,12 +141,12 @@
         private void GenerateFileCs(string nameService, string nameServiceUi, Type abstraction,
             GeneratorHelper generatorHelper)
         {
-            generatorHelper.NamespaceOpen(_controllerUiData.NamespaceControllerUI);
-            generatorHelper.Using(_controllerUiData.NamespaceMvc);
-            generatorHelper.Using(_controllerUiData.NamespaceControllerAbstractions);
-            generatorHelper.Using(_controllerUiData.NamespaceController);
+            generatorHelper.NamespaceOpen(_controlUiData.NamespaceControllerUI);
+            generatorHelper.Using(_controlUiData.NamespaceMvc);
+            generatorHelper.Using(_controlUiData.NamespaceControllerAbstractions);
+            generatorHelper.Using(_controlUiData.NamespaceController);
 
-            generatorHelper.ClassOpen(nameServiceUi, $"{nameof(ControllerUi)}, {abstraction.Name}");
+            generatorHelper.ClassOpen(nameServiceUi, $"{nameof(ControlUi)}, {abstraction.Name}");
             generatorHelper.ConstWriteLine("string", $"\"Ошибка контроллера {nameServiceUi}\"");
             generatorHelper.VariableWriteline($"private {nameService} _realization;");
             generatorHelper.VariableWriteline($"private {nameService} Realization => _realization ?? " +

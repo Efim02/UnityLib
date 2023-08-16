@@ -1,0 +1,114 @@
+﻿namespace UnityLib.Editor.XmlGenerator
+{
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    using UnityEditor;
+
+    using UnityEngine;
+
+    using UnityLib.Architecture.Log;
+    using UnityLib.Architecture.Utils;
+    using UnityLib.Core.Constants;
+    using UnityLib.Core.Extensions;
+    using UnityLib.Core.Models.Localization;
+    using UnityLib.Core.Utils;
+
+    public class LabelStorageMenuItems
+    {
+        /// <summary>
+        /// Ресурсы.
+        /// </summary>
+        private static readonly string _localization = Path.Combine(
+            Application.dataPath,
+            PathConstants.RESOURCES_FOLDER,
+            Localizer.LOCALIZATION_FOLDER);
+
+        /// <summary>
+        /// Построить json, пример заполнения.
+        /// </summary>
+        [MenuItem("Игра/Генераторы Xml/Локализация/Создать файлы")]
+        public static void BuildJsonCommand()
+        {
+            var fileNames = GetFileNames();
+
+            foreach (var fileName in fileNames)
+            {
+                var path = Path.Combine(_localization, fileName);
+                if (File.Exists(path))
+                {
+                    GameLogger.Error($"Файл {fileName} с надписями, существует!");
+                    continue;
+                }
+
+                XmlUtils.Serialize(new LabelStorageDto(new List<LabelDto> { new() }), path);
+            }
+        }
+
+        /// <summary>
+        /// Проверить количество, команда.
+        /// </summary>
+        [MenuItem("Игра/Генераторы Xml/Локализация/Проверить файлы")]
+        public static void CheckCountCommand()
+        {
+            GetFileNames().ForEach(CheckFile);
+        }
+
+        /// <summary>
+        /// Проверить количество.
+        /// </summary>
+        private static void CheckFile(string fileName)
+        {
+            var editorKeyLabels = SceneUtils.GetAllScenes().SelectMany(scene => scene.GetRootGameObjects())
+                .Select(go => go.transform)
+                .SelectMany(TransformExtensions.GetAllFromHierarchy)
+                .Select(MonoUtils.GetComponent<LocalizationComponent>)
+                .Select(lc => lc.LabelKey)
+                .ToList();
+            var path = Path.Combine(_localization, fileName);
+
+            if (!File.Exists(path))
+            {
+                GameLogger.Warning($"Отсутствует файл -{path}-");
+                return;
+            }
+
+            GameLogger.Info($"Проверка файла надписей - {fileName}");
+
+            var labelStorageDto = XmlUtils.Deserialize<LabelStorageDto>(path);
+            if (editorKeyLabels.Count != labelStorageDto.Labels.Count())
+            {
+                GameLogger.Error("Количество надписей, не совпадает, с количеством в перечислении.");
+                return;
+            }
+
+            var notContained = new List<string>();
+            foreach (var editorKey in editorKeyLabels)
+            {
+                if (labelStorageDto.Labels.All(i => i.Key != editorKey))
+                    notContained.Add(editorKey);
+            }
+
+            if (notContained.Any())
+            {
+                GameLogger.Error($"Нет совпадения в надписях:\n{notContained.ToText()}");
+                return;
+            }
+
+            GameLogger.Info("Списки надписей валидны.");
+        }
+
+        /// <summary>
+        /// Получить путь к Json документу.
+        /// </summary>
+        private static List<string> GetFileNames()
+        {
+            return new List<string>
+            {
+                Localizer.LABELS_EN + PathConstants.XML,
+                Localizer.LABELS_RU + PathConstants.XML
+            };
+        }
+    }
+}
