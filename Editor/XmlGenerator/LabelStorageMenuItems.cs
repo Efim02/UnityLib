@@ -33,12 +33,13 @@
         {
             var fileNames = GetFileNames();
 
+            Directory.CreateDirectory(_localization);
             foreach (var fileName in fileNames)
             {
                 var path = Path.Combine(_localization, fileName);
                 if (File.Exists(path))
                 {
-                    GameLogger.Error($"Файл {fileName} с надписями, существует!");
+                    GameLogger.Error($"Файл {fileName} с надписями, существует!\n{path}");
                     continue;
                 }
 
@@ -83,16 +84,17 @@
                 return;
             }
 
-            var notContained = new List<string>();
+            var notContainedKey = new List<string>();
             foreach (var editorKey in editorKeyLabels)
             {
                 if (labelStorageDto.Labels.All(i => i.Key != editorKey))
-                    notContained.Add(editorKey);
+                    notContainedKey.Add(editorKey);
             }
 
-            if (notContained.Any())
+            if (notContainedKey.Any())
             {
-                GameLogger.Error($"Нет совпадения в надписях:\n{notContained.ToText()}");
+                GameLogger.Error(
+                    $"Нет совпадения в надписях. В словарь добавлены надписи:\n{notContainedKey.ToText()}");
                 return;
             }
 
