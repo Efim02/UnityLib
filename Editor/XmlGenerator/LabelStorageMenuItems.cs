@@ -9,7 +9,6 @@
     using UnityEngine;
 
     using UnityLib.Architecture.Log;
-    using UnityLib.Architecture.Utils;
     using UnityLib.Core.Constants;
     using UnityLib.Core.Extensions;
     using UnityLib.Core.Models.Localization;
@@ -61,14 +60,17 @@
         /// </summary>
         private static void CheckFile(string fileName)
         {
-            var editorKeyLabels = SceneUtils.GetAllScenes().SelectMany(scene => scene.GetRootGameObjects())
+            // INFUT: Добавть поиск по файлам кода
+            var editorKeyLabels = SceneUtils.GetAllScenes()
+                .SelectMany(scene => scene.GetRootGameObjects())
                 .Select(go => go.transform)
                 .SelectMany(TransformExtensions.GetAllFromHierarchy)
-                .Select(MonoUtils.GetComponent<LocalizationComponent>)
+                .Select(go => go.GetComponent<LocalizationComponent>())
+                .Where(go => go != null)
                 .Select(lc => lc.LabelKey)
                 .ToList();
-            var path = Path.Combine(_localization, fileName);
 
+            var path = Path.Combine(_localization, fileName);
             if (!File.Exists(path))
             {
                 GameLogger.Warning($"Отсутствует файл -{path}-");
@@ -78,7 +80,7 @@
             GameLogger.Info($"Проверка файла надписей - {fileName}");
 
             var labelStorageDto = XmlUtils.Deserialize<LabelStorageDto>(path);
-            if (editorKeyLabels.Count != labelStorageDto.Labels.Count())
+            if (editorKeyLabels.Count < labelStorageDto.Labels.Count)
             {
                 GameLogger.Error("Количество надписей, не совпадает, с количеством в перечислении.");
                 return;

@@ -17,7 +17,7 @@
         /// </summary>
         public abstract bool IsNeedUpdateView { get; }
 
-        protected void Awake()
+        protected void Start()
         {
             InitializeView();
         }

@@ -4,7 +4,6 @@
 
     using UnityEngine;
 
-    using UnityLib.Core.Helpers;
     using UnityLib.Core.Helpers.Fields;
 
     /// <summary>

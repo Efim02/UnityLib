@@ -7,7 +7,6 @@
     using UnityLib.Architecture.Di.CancellationFactory;
     using UnityLib.Architecture.Log;
 
-
     /// <summary>
     /// Инжектор зависимостей.
     /// </summary>
@@ -209,8 +208,19 @@
         /// <summary>
         /// Зарегистрировать одиночку.
         /// </summary>
+        /// <typeparam name="TSource"> Тип по которому будем запрашивать. </typeparam>
+        /// <param name="existsOnScene"> Существует одну сцену. </param>
+        public static void RebindSingleton<TSource>(bool existsOnScene)
+        {
+            RebindSingleton<TSource, TSource>(existsOnScene);
+        }
+
+        /// <summary>
+        /// Зарегистрировать одиночку.
+        /// </summary>
         /// <typeparam name="TInterface"> Тип по которому будем запрашивать. Интерфейс. </typeparam>
         /// <typeparam name="TSource"> Что вернется. </typeparam>
+        /// <param name="existsOnScene"> Существует одну сцену. </param>
         public static void RebindSingleton<TInterface, TSource>(bool existsOnScene)
         {
             if (ContainsTypeInDictionaries<TInterface>(ref existsOnScene))
@@ -218,16 +228,27 @@
 
             var interfaceType = typeof(TInterface);
             var sourceType = typeof(TSource);
-
-            if (IsPickyType(sourceType, out var parameters))
+            
+            if (!HasHardConstruct(sourceType, out var parameters))
             {
-                var pickyInstance = new PickyInstance(existsOnScene, interfaceType, sourceType, parameters);
-                _pickyInstances.Add(pickyInstance);
+                var source = Activator.CreateInstance<TSource>();
+                AddSourceInDictionaries(interfaceType, source, existsOnScene);
                 return;
             }
 
-            var source = Activator.CreateInstance<TSource>();
-            AddSourceInDictionaries(interfaceType, source, existsOnScene);
+            var pickyInstance = _pickyInstances.FirstOrDefault(pi => pi.Type.FullName == sourceType.FullName);
+            if (pickyInstance != null)
+                throw new Exception($"Зависимость {pickyInstance.Type.Name} уже зарегистрирована");
+
+            var dictionary = GetAllDependenciesDictionary();
+            
+            // TODO: ИТОГО. Нужно сделать так чтобы сразу создавался объект и добавлялся в словарь,
+            // а не проверялись зависимости.
+            var hasDependencies = parameters.All(p => dictionary.Any(pair => pair.Key.FullName == p.FullName));
+
+            var createdPickyInstance = new PickyInstance(existsOnScene, interfaceType, sourceType, parameters);
+            _pickyInstances.Add(createdPickyInstance);
+            CheckPickyTypes();
         }
 
         /// <summary>
@@ -256,30 +277,26 @@
         /// <param name="type"> Тип объекта. </param>
         private static void AddSourceInDictionaries(Type type, object source, bool existsOnScene)
         {
-            var dictionary = existsOnScene ? _dictionaryScene : _dictionary;
+            var dictionary = GetDependenciesDictionary(existsOnScene);
             dictionary.Add(type, source);
 
-            CheckPickyTypes(existsOnScene);
+            CheckPickyTypes();
         }
 
         /// <summary>
         /// Проверить требовательные типы с конструктарами, у которых есть параметры.
         /// </summary>
-        /// <param name="existsOnScene"> Существует ли объект одну сцену. </param>
-        private static void CheckPickyTypes(bool existsOnScene)
+        private static void CheckPickyTypes()
         {
-            var pickyInstances = _pickyInstances.Where(pT => pT.ExistsOnScene == existsOnScene).ToArray();
-            if (pickyInstances.Length == 0)
-                return;
+            var dictionary = GetAllDependenciesDictionary();
+            var pickyInstances = _pickyInstances.ToList();
 
-            var dictionary = existsOnScene ? _dictionaryScene : _dictionary;
             var removedPickyInstance = new List<KeyValuePair<object, PickyInstance>>();
-
             foreach (var pickyInstance in pickyInstances)
             {
-                // Получаем необходимые сущетсвующие синглтоны.
-                var neededExistsInstances = dictionary.Where(eI => pickyInstance.Parameters
-                    .Any(p => p.Name == eI.Key.Name)).ToArray();
+                // Получаем необходимые существующие синглтоны.
+                var neededExistsInstances = dictionary.Where(
+                    obj => pickyInstance.Parameters.Any(p => p.FullName == obj.Key.FullName)).ToArray();
                 if (neededExistsInstances.Length != pickyInstance.Parameters.Length)
                     continue;
 
@@ -294,6 +311,15 @@
                 AddSourceInDictionaries(pickyInstance.InterfaceType, pairPickyInstance.Key,
                     pickyInstance.ExistsOnScene);
             }
+        }
+
+        /// <summary>
+        /// Получает словарь всех зависимостей.
+        /// </summary>
+        /// <returns>Словарь.</returns>
+        private static Dictionary<Type, object> GetAllDependenciesDictionary()
+        {
+            return _dictionary.Concat(_dictionaryScene).ToDictionary(p => p.Key, p => p.Value);
         }
 
         /// <summary>
@@ -313,12 +339,15 @@
         /// <param name="pickyInstance"> Инстанс, который создается с задержкой. </param>
         /// <param name="neededExistsInstances"> Необходимые инстансы. </param>
         /// <returns> Ключ: созданный объект. Значение: описание инстанса с задержкой. </returns>
-        private static KeyValuePair<object, PickyInstance> CreatePickyInstance(PickyInstance pickyInstance,
+        private static KeyValuePair<object, PickyInstance> CreatePickyInstance(
+            PickyInstance pickyInstance,
             KeyValuePair<Type, object>[] neededExistsInstances)
         {
             // Сортируем параметры в правильном порядке.
             var parameterInstances = new List<object>();
-            foreach (var parameter in pickyInstance.Parameters)
+            var parameters = pickyInstance.Parameters;
+
+            foreach (var parameter in parameters)
             {
                 var parameterInstance = neededExistsInstances.First(eI => eI.Key.Name == parameter.Name);
                 parameterInstances.Add(parameterInstance.Value);
@@ -333,12 +362,22 @@
         }
 
         /// <summary>
+        /// Получает словарь зависимостей.
+        /// </summary>
+        /// <param name="existsOnScene"> Получить ли словарь сцены. </param>
+        /// <returns> Словарь с зависимостями. </returns>
+        private static Dictionary<Type, object> GetDependenciesDictionary(bool existsOnScene)
+        {
+            return existsOnScene ? _dictionaryScene : _dictionary;
+        }
+
+        /// <summary>
         /// Является ли тип с конструктором с параметрами.
         /// </summary>
         /// <param name="type"> Тип. </param>
         /// <param name="parameters"> Параметры в конструкторе. </param>
         /// <returns> TRUE - если тип сложный, имеет параметры в конструкторе. </returns>
-        private static bool IsPickyType(Type type, out Type[] parameters)
+        private static bool HasHardConstruct(Type type, out Type[] parameters)
         {
             var constructors = type.GetConstructors();
             if (constructors.Length > 1)

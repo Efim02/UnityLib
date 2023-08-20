@@ -71,7 +71,7 @@
             if (!_dictionary.ContainsKey(keyLabel))
             {
                 GameLogger.Error($"Отсутствует перевод для {keyLabel}.");
-                return null;
+                return keyLabel;
             }
 
             return _dictionary[keyLabel];
