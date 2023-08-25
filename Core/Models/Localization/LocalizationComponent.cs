@@ -9,7 +9,6 @@
     /// <summary>
     /// Компоненет для установки корректной надписи, в текстовом компоненте.
     /// </summary>
-    [RequireComponent(typeof(Text))]
     public class LocalizationComponent : MonoBehaviour, ILabel
     {
         /// <summary>
@@ -38,7 +37,7 @@
         /// <inheritdoc />
         public void UpdateLabel()
         {
-            var textComponent = MonoUtils.GetComponent<Text>(this);
+            var textComponent = MonoUtils.GetComponent<TextMesh>(this);
             textComponent.text = Injector.Get<Localizer>().GetLabel(_labelKey);
         }
     }

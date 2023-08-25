@@ -1,6 +1,8 @@
 ﻿namespace UnityLib.Core.Utils
 {
     using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
 
     using UnityEngine.SceneManagement;
 
@@ -10,14 +12,24 @@
     public static class SceneUtils
     {
         /// <summary>
-        /// Получает все сцены в проекте.
+        /// Получает все имена сцен в проекте.
         /// </summary>
-        /// <returns> Сцены. </returns>
-        public static IEnumerable<Scene> GetAllScenes()
+        /// <returns> Имена сцен. </returns>
+        public static IEnumerable<string> GetAllSceneNames()
+        {
+            return GetAllScenePaths().Select(Path.GetFileNameWithoutExtension);
+        }
+
+        /// <summary>
+        /// Получает все имена сцен в проекте.
+        /// </summary>
+        /// <returns> Имена сцен. </returns>
+        public static IEnumerable<string> GetAllScenePaths()
         {
             for (var index = 0; index < SceneManager.sceneCountInBuildSettings; index++)
             {
-                yield return SceneManager.GetSceneAt(index);
+                var scenePath = SceneUtility.GetScenePathByBuildIndex(index);
+                yield return scenePath;
             }
         }
     }
