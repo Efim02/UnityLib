@@ -39,8 +39,8 @@
         /// <param name="message"> Сообщение. </param>
         public static void Error(string message)
         {
-            Debug.LogError($"GameLogger: {message}");
-            WriteLog($"Error | {message}.\n" +
+            Debug.LogError($"Игровой журнал: {message}");
+            WriteLog($"Ошибка | {message}.\n" +
                      $" - Unity StackTrace: {StackTraceUtility.ExtractStackTrace()}");
         }
 

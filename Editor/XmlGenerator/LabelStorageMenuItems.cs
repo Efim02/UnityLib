@@ -7,6 +7,7 @@
     using UnityEditor;
 
     using UnityEngine;
+    using UnityEngine.SceneManagement;
 
     using UnityLib.Architecture.Log;
     using UnityLib.Core.Constants;
@@ -61,7 +62,7 @@
         private static void CheckFile(string fileName)
         {
             // INFUT: Добавть поиск по файлам кода
-            var editorKeyLabels = SceneUtils.GetAllScenes()
+            var editorKeyLabels = new List<Scene> { SceneManager.GetActiveScene() }
                 .SelectMany(scene => scene.GetRootGameObjects())
                 .Select(go => go.transform)
                 .SelectMany(TransformExtensions.GetAllFromHierarchy)
@@ -77,30 +78,36 @@
                 return;
             }
 
-            GameLogger.Info($"Проверка файла надписей - {fileName}");
+            GameLogger.Info("Проверка файла надписей - ");
 
             var labelStorageDto = XmlUtils.Deserialize<LabelStorageDto>(path);
-            if (editorKeyLabels.Count < labelStorageDto.Labels.Count)
-            {
-                GameLogger.Error("Количество надписей, не совпадает, с количеством в перечислении.");
-                return;
-            }
-
             var notContainedKey = new List<string>();
+
+            var labels = labelStorageDto.Labels;
             foreach (var editorKey in editorKeyLabels)
             {
-                if (labelStorageDto.Labels.All(i => i.Key != editorKey))
+                if (labels.All(i => i.Key != editorKey))
                     notContainedKey.Add(editorKey);
             }
 
             if (notContainedKey.Any())
             {
-                GameLogger.Error(
-                    $"Нет совпадения в надписях. В словарь добавлены надписи:\n{notContainedKey.ToText()}");
+                GameLogger.Error($"Словарь {fileName} не валиден, нет совпадения в надписях. " +
+                                 $"В словарь добавлены надписи:\n{notContainedKey.ToText()}");
+                labels.AddRange(notContainedKey.Select(k => new LabelDto { Key = k, Label = string.Empty }));
+                XmlUtils.Serialize(labelStorageDto, path);
                 return;
             }
 
-            GameLogger.Info("Списки надписей валидны.");
+            var notValidLabels = labels.Where(l => string.IsNullOrWhiteSpace(l.Label)).ToList();
+            if (notValidLabels.Any())
+            {
+                GameLogger.Warning($"Словарь {fileName} имеет не заполненные значения:\n " +
+                                   $"{notValidLabels.ToText(l => l.Key)}");
+                return;
+            }
+
+            GameLogger.Info($"Словарь {fileName} валиден.");
         }
 
         /// <summary>

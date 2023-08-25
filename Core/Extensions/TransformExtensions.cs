@@ -47,12 +47,15 @@
         private static IEnumerable<Transform> GetChildrenRecursive(this Transform transform)
         {
             var children = transform.GetChildren();
+            var transforms = new List<Transform>();
+
             foreach (var child in children)
             {
-                children.AddRange(child.GetChildrenRecursive());
+                transforms.Add(child);
+                transforms.AddRange(child.GetChildrenRecursive());
             }
 
-            return children;
+            return transforms;
         }
     }
 }
