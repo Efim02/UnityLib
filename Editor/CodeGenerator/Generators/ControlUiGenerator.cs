@@ -44,7 +44,8 @@
             _controlUiData = controlUiData;
 
             var types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.ExportedTypes).ToList();
+                .Where(a => a.IsDynamic)
+                .SelectMany(a => a.GetTypes()).ToList();
             _abstractions = types
                 .Where(t => t.FullName!
                     .Contains(_controlUiData.NamespaceAbstractions))

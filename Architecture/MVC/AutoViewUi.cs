@@ -13,9 +13,10 @@
         private bool _isRegistered;
 
         /// <summary>
-        /// Нужно ли обновить представление, с текущими значениями модели.
+        /// Нужно ли обновить представление, с текущими значениями модели,
+        /// при инициализации "Start" представления.
         /// </summary>
-        public abstract bool IsNeedUpdateView { get; }
+        public virtual bool IsNeedUpdateView => true;
 
         protected void Start()
         {
