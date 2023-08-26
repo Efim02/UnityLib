@@ -69,7 +69,6 @@
             if (View != null)
             {
                 View.UpdateView(this);
-                View.IsVisible = true;
                 return;
             }
 
@@ -79,7 +78,6 @@
             foreach (var view in views)
             {
                 view.UpdateView(this);
-                view.IsVisible = true;
             }
         }
 

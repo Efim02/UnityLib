@@ -41,7 +41,7 @@
         /// <inheritdoc />
         public Settings()
         {
-            _pathSettings = $"{PathConstants.PathPersistent}/{PathConstants.SETTINGS}";
+            _pathSettings = $"{Application.persistentDataPath}/{PathConstants.SETTINGS}";
             Load();
         }
 

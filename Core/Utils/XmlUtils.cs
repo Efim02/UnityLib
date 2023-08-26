@@ -14,12 +14,12 @@
         /// </summary>
         /// <param name="path"> Путь. </param>
         /// <returns> Объект. Null если не получилось десериализовать или нет файла. </returns>
-        public static T Deserialize<T>(string path) where T : class
+        public static T Deserialize<T>(string path)
         {
             if (!File.Exists(path))
             {
                 GameLogger.Warning($"Xml сериализатор. Нет файла: {Path.GetFileName(path)}");
-                return null;
+                return default;
             }
 
             try
@@ -33,7 +33,7 @@
             {
                 GameLogger.Warning($"Не удалось получить объект {typeof(T)} из xml файла." +
                                    $"\nСообщение: {exception.Message}.");
-                return null;
+                return default;
             }
         }
 
@@ -41,8 +41,8 @@
         /// Десериализовать xml разметку.
         /// </summary>
         /// <param name="xmlMarkup"> Xml разметка. </param>
-        /// <returns> Объект. Null если не получилось десериализовать или нет файла. </returns>
-        public static T DeserializeXml<T>(string xmlMarkup) where T : class
+        /// <returns> Объект. Default если не получилось десериализовать или нет файла. </returns>
+        public static T DeserializeXml<T>(string xmlMarkup)
         {
             try
             {
@@ -55,7 +55,7 @@
             {
                 GameLogger.Warning($"Не удалось получить объект {typeof(T)} из xml файла." +
                                    $"\nСообщение: {exception.Message}.");
-                return null;
+                return default;
             }
         }
 

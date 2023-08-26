@@ -244,6 +244,7 @@
             
             // TODO: ИТОГО. Нужно сделать так чтобы сразу создавался объект и добавлялся в словарь,
             // а не проверялись зависимости.
+            // ReSharper disable once UnusedVariable
             var hasDependencies = parameters.All(p => dictionary.Any(pair => pair.Key.FullName == p.FullName));
 
             var createdPickyInstance = new PickyInstance(existsOnScene, interfaceType, sourceType, parameters);

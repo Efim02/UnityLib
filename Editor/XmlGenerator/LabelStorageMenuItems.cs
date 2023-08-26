@@ -61,7 +61,7 @@
         /// </summary>
         private static void CheckFile(string fileName)
         {
-            // INFUT: Добавть поиск по файлам кода
+            // INFUT: Добавить поиск по файлам кода
             var editorKeyLabels = new List<Scene> { SceneManager.GetActiveScene() }
                 .SelectMany(scene => scene.GetRootGameObjects())
                 .Select(go => go.transform)
@@ -90,11 +90,12 @@
                     notContainedKey.Add(editorKey);
             }
 
+            // INFUT: Выводить или ссылки или адреса до объектов Unity, без ключа.
             if (notContainedKey.Any())
             {
                 GameLogger.Error($"Словарь {fileName} не валиден, нет совпадения в надписях. " +
                                  $"В словарь добавлены надписи:\n{notContainedKey.ToText()}");
-                labels.AddRange(notContainedKey.Select(k => new LabelDto { Key = k, Label = string.Empty }));
+                labels.AddRange(notContainedKey.Select(k => new LabelDto { Key = k, Label = k }));
                 XmlUtils.Serialize(labelStorageDto, path);
                 return;
             }

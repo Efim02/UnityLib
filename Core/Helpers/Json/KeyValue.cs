@@ -3,13 +3,14 @@
     using System;
 
     /// <summary>
-    /// Ключ-значение для Json.
+    /// Ключ-значение.
     /// </summary>
     [Serializable]
-    public class JsonPair<TKey, TValue>
+    public class KeyValue<TKey, TValue> : IEquatable<KeyValue<TKey, TValue>>
+        where TKey : IEquatable<TKey>
     {
-        private TValue _value;
         private TKey _key;
+        private TValue _value;
 
         public TKey Key
         {
@@ -21,6 +22,12 @@
         {
             get => _value;
             set => _value = value;
+        }
+
+        /// <inheritdoc />
+        public bool Equals(KeyValue<TKey, TValue> other)
+        {
+            return other != null && Key.Equals(other.Key);
         }
     }
 }
