@@ -95,7 +95,7 @@
             {
                 GameLogger.Error($"Словарь {fileName} не валиден, нет совпадения в надписях. " +
                                  $"В словарь добавлены надписи:\n{notContainedKey.ToText()}");
-                labels.AddRange(notContainedKey.Select(k => new LabelDto { Key = k, Label = k }));
+                labels.AddRange(notContainedKey.Distinct().Select(k => new LabelDto { Key = k }));
                 XmlUtils.Serialize(labelStorageDto, path);
                 return;
             }

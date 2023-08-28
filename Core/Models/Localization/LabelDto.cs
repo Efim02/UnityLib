@@ -7,7 +7,7 @@
     /// DTO надписи.
     /// </summary>
     [Serializable]
-    public class LabelDto
+    public class LabelDto : IEquatable<LabelDto>
     {
         /// <summary>
         /// Ключ.
@@ -20,5 +20,11 @@
         /// </summary>
         [XmlAttribute]
         public string Label { get; set; }
+
+        /// <inheritdoc />
+        public bool Equals(LabelDto other)
+        {
+            return Key == other.Key;
+        }
     }
 }
