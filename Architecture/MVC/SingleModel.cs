@@ -2,10 +2,12 @@
 {
     using System;
 
+    using UnityLib.Architecture.Utils;
+
     /// <summary>
     /// Модель для синглтонов.
     /// </summary>
-    public class SingleModel : IModel, IDisposable
+    public abstract class SingleModel : IModel, IDisposable
     {
         /// <summary>
         /// Конструктор по умолчанию.
@@ -18,10 +20,7 @@
         /// <summary>
         /// Конструктор модели.
         /// </summary>
-        /// <param name="view">
-        /// Представление.
-        /// Укажите Null если привязка для единственного экземпляра.
-        /// </param>
+        /// <param name="view"> Представление. Укажите Null если привязка для единственного экземпляра. </param>
         public SingleModel(IView view) : this()
         {
             View = view;
@@ -66,19 +65,22 @@
         /// </summary>
         public void UpdateView()
         {
-            if (View != null)
+            DispatcherUtils.SafeInvoke(() =>
             {
-                View.UpdateView(this);
-                return;
-            }
+                if (View != null)
+                {
+                    View.UpdateView(this);
+                    return;
+                }
 
-            if (!ViewModelConnector.TryGetViews(this, out var views))
-                return;
+                if (!ViewModelConnector.TryGetViews(this, out var views))
+                    return;
 
-            foreach (var view in views)
-            {
-                view.UpdateView(this);
-            }
+                foreach (var view in views)
+                {
+                    view.UpdateView(this);
+                }
+            });
         }
 
         /// <summary>

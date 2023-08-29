@@ -13,33 +13,6 @@
     public abstract class ViewUi<TModel> : MonoBehaviour, IView
         where TModel : IModel
     {
-        /// <inheritdoc />
-        /// <remarks> Реализовать, если необходим такой callback. </remarks>
-        public virtual void InitializeView()
-        {
-        }
-
-
-        /// <inheritdoc />
-        public void InitializeView(IModel model)
-        {
-            if (model is not TModel tModel)
-            {
-                GameLogger.Error($"Ошибка привязки Model-View: {model.GetType().Name} " +
-                                 $"не является {typeof(TModel).Name}.");
-                return;
-            }
-
-            try
-            {
-                InitializeView(tModel);
-            }
-            catch (Exception exception)
-            {
-                GameLogger.Error(exception, $"Ошибка инициализации представления - {GetType().Name}.");
-            }
-        }
-
         /// <summary>
         /// Включено.
         /// </summary>
@@ -88,15 +61,6 @@
             {
                 GameLogger.Error(exception, $"Ошибка обновления представления - {GetType().Name}.");
             }
-        }
-
-        /// <summary>
-        /// Инициализация представления, через модель.
-        /// </summary>
-        /// <param name="model"> Модель. </param>
-        /// <remarks> Реализовать, если необходим такой callback. </remarks>
-        protected virtual void InitializeView(TModel model)
-        {
         }
 
         /// <summary>

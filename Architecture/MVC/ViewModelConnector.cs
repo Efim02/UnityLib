@@ -93,7 +93,6 @@
                 return null;
             }
 
-            view.InitializeView(model);
             view.IsVisible = true;
             view.UpdateView(model);
 

@@ -8,6 +8,7 @@
 
     using UnityLib.Architecture.Di;
     using UnityLib.Architecture.Log;
+    using UnityLib.Architecture.Utils;
     using UnityLib.Core.Models.Level;
     using UnityLib.Core.Utils;
 

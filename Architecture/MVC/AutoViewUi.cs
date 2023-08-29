@@ -35,12 +35,12 @@
         /// <summary>
         /// Создание объекта, и добавление представления, для модели.
         /// </summary>
-        public sealed override void InitializeView()
+        private void InitializeView()
         {
             if (_isRegistered)
                 return;
 
-            // Если представление ни разу не будет активировано, OnDestroy не отработает.
+            // Если п   редставление ни разу не будет активировано, OnDestroy не отработает.
             gameObject.SetActive(true);
             gameObject.SetActive(false);
 

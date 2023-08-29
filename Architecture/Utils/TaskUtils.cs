@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Core.Utils
+﻿namespace UnityLib.Architecture.Utils
 {
     using System;
     using System.Threading;
@@ -36,7 +36,7 @@
         /// Убедиться что во время выполнения задачи не было исключений.
         /// </summary>
         /// <param name="task"> Задача. </param>
-        public static async void TryProtect(Task task)
+        public static async Task TryProtect(Task task)
         {
             try
             {
@@ -56,7 +56,7 @@
         /// </summary>
         /// <param name="action"> Действие. </param>
         /// <returns> Задача, которая ожидается. </returns>
-        public static async void TryRun(Action action)
+        public static async Task TryRun(Action action)
         {
             try
             {
@@ -76,7 +76,7 @@
         /// </summary>
         /// <param name="action"> Действие. </param>
         /// <returns> Задача, которая ожидается. </returns>
-        public static async void TryRun<T>(Func<T> action)
+        public static async Task TryRun<T>(Func<T> action)
         {
             try
             {
@@ -97,9 +97,9 @@
         /// <param name="func"> Будуща задача. </param>
         /// <returns> Задача, которая ожидается. </returns>
         /// <remarks> Использовать в КРАЙНИХ случаях, когда выполняется логика до асинхрона. </remarks>
-        public static void TryRun(Func<Task> func)
+        public static Task TryRun(Func<Task> func)
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 try
                 {
