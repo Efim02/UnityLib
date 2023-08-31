@@ -40,6 +40,18 @@
         }
 
         /// <summary>
+        /// Получает корневого родителя.
+        /// </summary>
+        /// <param name="transform"> Трансформ. </param>
+        /// <returns> Корневой родитель. </returns>
+        public static Transform GetRootParent(this Transform transform)
+        {
+            return transform.parent == null
+                ? transform
+                : transform.parent.GetRootParent();
+        }
+
+        /// <summary>
         /// Получает всех наследников у текущего объекта, и рекурсивно у всех его наследников.
         /// </summary>
         /// <param name="transform"> Трансформ. </param>

@@ -70,7 +70,7 @@
         {
             if (!_dictionary.ContainsKey(keyLabel))
             {
-                GameLogger.Error($"Отсутствует перевод для {keyLabel}.");
+                GameLogger.Error($"Отсутствует перевод для \"{keyLabel}\"");
                 return keyLabel;
             }
 
@@ -87,7 +87,7 @@
                 : SystemLanguage.English;
             var pathLocalization = _availableLocalizations[availableLanguage];
 
-            GameLogger.Info($"Загружены надписи с языком -{availableLanguage}-.");
+            GameLogger.Info($"Загружены надписи с языком \"{availableLanguage}\"");
 
             var xmlFile = Resources.Load<TextAsset>(pathLocalization);
             var labelStorageDto = XmlUtils.DeserializeXml<LabelStorageDto>(xmlFile.text);

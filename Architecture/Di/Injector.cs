@@ -20,10 +20,7 @@
         /// <summary>
         /// Словарь привязок, которые должны быть выполнены после создания объекта.
         /// </summary>
-        /// <remarks>
-        /// Пока что не понятно нужно ли это; где-то еще.
-        /// РАБОТАЕТ только для синглтонов игры.
-        /// </remarks>
+        /// <remarks> Пока что не понятно нужно ли это; где-то еще. РАБОТАЕТ только для синглтонов игры. </remarks>
         private static readonly Dictionary<Type, List<Action<object>>> _dictionaryAfterBindings;
 
         /// <summary>
@@ -32,8 +29,8 @@
         private static readonly Dictionary<Type, object> _dictionaryScene;
 
         /// <summary>
-        /// Словарь с типами которые нужно инициализировать.
-        /// <c> Ключ: тип объекта; Значение: является объектом одной сцены, необходимые типы параметров. </c>
+        /// Словарь с типами которые нужно инициализировать. <c> Ключ: тип объекта; Значение: является объектом одной сцены,
+        /// необходимые типы параметров. </c>
         /// </summary>
         private static readonly List<PickyInstance> _pickyInstances;
 
@@ -164,7 +161,7 @@
             if (_dictionary.TryGetValue(typeof(T), out var dictValue))
                 return (T)dictValue;
 
-            GameLogger.Error($"В словаре объектов нет: {typeof(T).Name}");
+            ProcessNotExistsObject<T>(false);
             return null;
         }
 
@@ -179,7 +176,7 @@
             if (_dictionaryScene.TryGetValue(typeof(T), out var dictSceneValue))
                 return (T)dictSceneValue;
 
-            GameLogger.Error($"В словаре объектов сцены нет: {typeof(T).Name}.");
+            ProcessNotExistsObject<T>(true);
             return null;
         }
 
@@ -228,7 +225,7 @@
 
             var interfaceType = typeof(TInterface);
             var sourceType = typeof(TSource);
-            
+
             if (!HasHardConstruct(sourceType, out var parameters))
             {
                 var source = Activator.CreateInstance<TSource>();
@@ -241,9 +238,8 @@
                 throw new Exception($"Зависимость {pickyInstance.Type.Name} уже зарегистрирована");
 
             var dictionary = GetAllDependenciesDictionary();
-            
-            // TODO: ИТОГО. Нужно сделать так чтобы сразу создавался объект и добавлялся в словарь,
-            // а не проверялись зависимости.
+
+            // TODO: ИТОГО. Нужно сделать так чтобы сразу создавался объект и добавлялся в словарь, а не проверялись зависимости.
             // ReSharper disable once UnusedVariable
             var hasDependencies = parameters.All(p => dictionary.Any(pair => pair.Key.FullName == p.FullName));
 
@@ -315,15 +311,6 @@
         }
 
         /// <summary>
-        /// Получает словарь всех зависимостей.
-        /// </summary>
-        /// <returns>Словарь.</returns>
-        private static Dictionary<Type, object> GetAllDependenciesDictionary()
-        {
-            return _dictionary.Concat(_dictionaryScene).ToDictionary(p => p.Key, p => p.Value);
-        }
-
-        /// <summary>
         /// Проверить наличие типа в словарях.
         /// </summary>
         /// <typeparam name="T"> Тип. </typeparam>
@@ -363,6 +350,15 @@
         }
 
         /// <summary>
+        /// Получает словарь всех зависимостей.
+        /// </summary>
+        /// <returns> Словарь. </returns>
+        private static Dictionary<Type, object> GetAllDependenciesDictionary()
+        {
+            return _dictionary.Concat(_dictionaryScene).ToDictionary(p => p.Key, p => p.Value);
+        }
+
+        /// <summary>
         /// Получает словарь зависимостей.
         /// </summary>
         /// <param name="existsOnScene"> Получить ли словарь сцены. </param>
@@ -388,6 +384,33 @@
             parameters = constructor.GetParameters().Select(p => p.ParameterType).ToArray();
 
             return parameters.Length > 0;
+        }
+
+        /// <summary>
+        /// Обрабатывает почему не существует объект.
+        /// </summary>
+        /// <param name="existsOnScene"> Существует на сцене. </param>
+        /// <typeparam name="T"> Тип объекта. </typeparam>
+        private static void ProcessNotExistsObject<T>(bool existsOnScene) where T : class
+        {
+            var pickyInstance = _pickyInstances.FirstOrDefault(pi => pi.InterfaceType == typeof(T));
+            if (pickyInstance == null)
+            {
+                var word = existsOnScene ? "сцены " : string.Empty;
+                GameLogger.Error($"В словаре объектов-одиночек {word}нет: {typeof(T).Name}");
+
+                return;
+            }
+
+            var allDependencies = existsOnScene ? GetAllDependenciesDictionary() : _dictionary;
+            var parameterNames = pickyInstance.Parameters.Where(p => !allDependencies.ContainsKey(p))
+                .Select(pi => pi.Name);
+
+            var scene = existsOnScene ? "на сцену, " : string.Empty;
+            GameLogger.Error($"Добавлен одиночка в игру, {scene}но не создан: {typeof(T).Name}\n" +
+                $"Не достающие параметры: {string.Join(", ", parameterNames)}");
+
+            return;
         }
     }
 }
