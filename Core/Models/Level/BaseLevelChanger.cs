@@ -72,6 +72,26 @@
             SceneManager.LoadScene(gameIndex);
         }
 
+        /// <inheritdoc />
+        public void LoadLevel(int gameLevelIndex)
+        {
+            
+            try
+            {
+                Injector.ClearSceneInstances();
+                ViewModelConnector.ClearSceneDictionary();
+
+                LevelLoading?.Invoke();
+
+                SceneManager.LoadScene(gameLevelIndex);
+            }
+            catch (Exception exception)
+            {
+                GameLogger.Error(exception, "Ошибка загрузки уровня.");
+            }
+
+        }
+
         /// <summary>
         /// Сцена изменена.
         /// </summary>

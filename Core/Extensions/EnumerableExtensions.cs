@@ -13,17 +13,22 @@
         /// Напечатать список в текст.
         /// </summary>
         /// <typeparam name="T"> Тип. </typeparam>
-        /// <param name="list"> Список. </param>
+        /// <param name="enumerable"> Список. </param>
         /// <param name="getter">
         /// Action возвращающий текст из каждого элемента.
         /// Если null, то ToString используется.
         /// </param>
         /// <returns> Общий текст в виде строчек для каждого элемента. </returns>
-        public static string ToText<T>(this IEnumerable<T> list, Func<T, string> getter = null)
+        public static string ToText<T>(this IEnumerable<T> enumerable, Func<T, string> getter = null)
         {
             var text = $"{typeof(T).Name}s";
+            var list = enumerable.ToList();
+
+            if (!list.Any())
+                return $"{text} - пустой";
+
             getter ??= item => item.ToString();
-            list.ToList().ForEach(item => text += $"\n{getter.Invoke(item)}");
+            list.ForEach(item => text += $"\n{getter.Invoke(item)}");
 
             return text;
         }

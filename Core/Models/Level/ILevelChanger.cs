@@ -23,5 +23,11 @@
         /// <param name="gameLevel"> Уровень. </param>
         /// <typeparam name="TLevelEnum"> Тип перечисления уровней. </typeparam>
         public void LoadLevel<TLevelEnum>(TLevelEnum gameLevel) where TLevelEnum : Enum;
+
+        /// <summary>
+        /// Загрузить уровень.
+        /// </summary>
+        /// <param name="gameLevelIndex"> Индекс уровня. </param>
+        public void LoadLevel(int gameLevelIndex);
     }
 }

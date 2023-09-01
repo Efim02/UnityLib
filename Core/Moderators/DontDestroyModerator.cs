@@ -22,20 +22,44 @@
         /// <summary>
         /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
         /// </summary>
-        public static void DestroyOrSave<T>(GameObject gameObject)
+        /// <returns>TRUE - если объект сделался синглтоном, иначе - FALSE.</returns>
+        public static bool DestroyOrSave<T>(GameObject gameObject)
         {
             var type = typeof(T);
+            return DestroyOrSave(gameObject, type);
+        }
+
+        /// <summary>
+        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
+        /// </summary>
+        /// <param name="component">Компонент.</param>
+        /// <returns>TRUE - если объект сделался синглтоном, иначе - FALSE.</returns>
+        public static bool DestroyOrSave(Component component)
+        {
+            var type = component.GetType();
+            var gameObject = component.gameObject;
+
+            return DestroyOrSave(gameObject, type);
+        }
+        
+        /// <summary>
+        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
+        /// </summary>
+        private static bool DestroyOrSave(GameObject gameObject, Type type)
+        {
             if (gameObject.transform.parent != null)
                 throw new Exception($"{gameObject.name} не является root объектом сцены");
 
             if (_dictionary.ContainsKey(type))
             {
                 Object.Destroy(gameObject);
-                return;
+                return false;
             }
 
             _dictionary.Add(type, gameObject);
             Object.DontDestroyOnLoad(gameObject);
+
+            return true;
         }
     }
 }

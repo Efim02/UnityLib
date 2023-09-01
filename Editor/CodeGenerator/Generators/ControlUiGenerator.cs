@@ -14,6 +14,7 @@
 
     using UnityLib.Architecture.Log;
     using UnityLib.Architecture.MVC;
+    using UnityLib.Core.Extensions;
 
     /// <summary>
     /// Генератор контроллеров для удобного использования.
@@ -44,7 +45,7 @@
             _controlUiData = controlUiData;
 
             var types = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => a.IsDynamic)
+                .Where(a => a.FullName.Contains(controlUiData.RootNameSpace))
                 .SelectMany(a => a.GetTypes()).ToList();
             _abstractions = types
                 .Where(t => t.FullName!
@@ -61,14 +62,16 @@
         /// </summary>
         public void CheckAndGenerate()
         {
-            var abstractions = _abstractions.Where(a => _controlUis.Any(c => c.IsSubclassOf(a))).ToList();
+            // не понимаю, почему не нужно отрицание.(хуйня какая-то, но работает, время 00:30)
+            var abstractions = _abstractions.Where(a => !_controlUis.Any(c => c.GetInterface(a.Name) != null)).ToList();
             if (!abstractions.Any())
             {
                 GameLogger.Info("Новые контролы отсутствуют");
                 return;
             }
 
-            GameLogger.Info($"Генерировать недостающие контроллеры Ui: {abstractions.Count}.");
+            GameLogger.Info($"Генерировать недостающие контроллеры Ui: {abstractions.Count}.\n" +
+                $"{abstractions.ToText()}");
 
             Generate(abstractions);
         }
