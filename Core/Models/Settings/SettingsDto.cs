@@ -38,7 +38,7 @@
         /// Система частиц включена.
         /// </summary>
         public bool ParticleSystemEnabled { get; set; }
-        
+
         /// <summary>
         /// Громкость звука.
         /// </summary>

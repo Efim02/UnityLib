@@ -43,7 +43,7 @@
         }
 
         #region Загрузить уровень X
-        
+
         private static void LoadLevel(int index)
         {
             SaveScene();

@@ -16,6 +16,11 @@
     public class Settings : SingleModel
     {
         /// <summary>
+        /// Путь к настройкам.
+        /// </summary>
+        private readonly string _pathSettings;
+
+        /// <summary>
         /// Языки, и их подпись.
         /// </summary>
         public readonly Dictionary<SystemLanguage, string> Languages = new Dictionary<SystemLanguage, string>
@@ -23,11 +28,6 @@
             { SystemLanguage.Russian, "Русский" },
             { SystemLanguage.English, "English" }
         };
-
-        /// <summary>
-        /// Путь к настройкам.
-        /// </summary>
-        private readonly string _pathSettings;
 
         /// <inheritdoc cref="AudioVolume" />
         private BindingProperty<float> _audioVolume;

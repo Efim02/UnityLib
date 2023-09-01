@@ -6,7 +6,7 @@
 
     using UnityEngine;
     using UnityEngine.Events;
-    
+
     using UnityLib.Architecture.Utils;
 
     /// <summary>
@@ -21,7 +21,7 @@
 
         [SerializeField]
         private UnityEvent<string, string> _onChanged;
-        
+
         [SerializeField]
         private UnityEvent<string> _onEnded;
 
@@ -52,7 +52,7 @@
         /// <summary>
         /// Обрабатывает событие завершения редактирования поля пользователем.
         /// </summary>
-        /// <param name="text">Текст.</param>
+        /// <param name="text"> Текст. </param>
         private void OnEndEdit(string text)
         {
             _onEnded?.Invoke(text);

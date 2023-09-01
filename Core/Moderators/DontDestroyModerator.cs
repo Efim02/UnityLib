@@ -12,7 +12,7 @@
     /// </summary>
     public static class DontDestroyModerator
     {
-        private static Dictionary<Type, GameObject> _dictionary;
+        private static readonly Dictionary<Type, GameObject> _dictionary;
 
         static DontDestroyModerator()
         {
@@ -20,9 +20,9 @@
         }
 
         /// <summary>
-        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
+        /// Уничтожает игровой объект или сохраняет для <see cref="UnityEngine.Object.DontDestroyOnLoad" />.
         /// </summary>
-        /// <returns>TRUE - если объект сделался синглтоном, иначе - FALSE.</returns>
+        /// <returns> TRUE - если объект сделался синглтоном, иначе - FALSE. </returns>
         public static bool DestroyOrSave<T>(GameObject gameObject)
         {
             var type = typeof(T);
@@ -30,10 +30,10 @@
         }
 
         /// <summary>
-        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
+        /// Уничтожает игровой объект или сохраняет для <see cref="UnityEngine.Object.DontDestroyOnLoad" />.
         /// </summary>
-        /// <param name="component">Компонент.</param>
-        /// <returns>TRUE - если объект сделался синглтоном, иначе - FALSE.</returns>
+        /// <param name="component"> Компонент. </param>
+        /// <returns> TRUE - если объект сделался синглтоном, иначе - FALSE. </returns>
         public static bool DestroyOrSave(Component component)
         {
             var type = component.GetType();
@@ -41,9 +41,9 @@
 
             return DestroyOrSave(gameObject, type);
         }
-        
+
         /// <summary>
-        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
+        /// Уничтожает игровой объект или сохраняет для <see cref="UnityEngine.Object.DontDestroyOnLoad" />.
         /// </summary>
         private static bool DestroyOrSave(GameObject gameObject, Type type)
         {

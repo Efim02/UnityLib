@@ -24,7 +24,7 @@
         /// <inheritdoc />
         public bool Equals(LabelDto other)
         {
-            return Key == other.Key;
+            return Key == other?.Key;
         }
     }
 }

@@ -75,7 +75,6 @@
         /// <inheritdoc />
         public void LoadLevel(int gameLevelIndex)
         {
-            
             try
             {
                 Injector.ClearSceneInstances();
@@ -89,7 +88,6 @@
             {
                 GameLogger.Error(exception, "Ошибка загрузки уровня.");
             }
-
         }
 
         /// <summary>

@@ -170,9 +170,7 @@
             _tabsCount = count;
             _tabs = string.Empty;
             for (; count > 0; count--)
-            {
                 _tabs += "\t";
-            }
         }
 
         private void WriteClosePart()

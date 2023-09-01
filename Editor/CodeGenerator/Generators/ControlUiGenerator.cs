@@ -71,7 +71,7 @@
             }
 
             GameLogger.Info($"Генерировать недостающие контроллеры Ui: {abstractions.Count}.\n" +
-                $"{abstractions.ToText()}");
+                            $"{abstractions.ToText()}");
 
             Generate(abstractions);
         }

@@ -9,7 +9,7 @@
         /// Обновить данные из модели.
         /// </summary>
         /// <param name="settings"> Настройки. </param>
-        /// <param name="settingsDto">Dto модель настроек. </param>
+        /// <param name="settingsDto"> Dto модель настроек. </param>
         public static void MapToDto(Settings settings, SettingsDto settingsDto)
         {
             settingsDto.IsTrained = settings.IsTrained;

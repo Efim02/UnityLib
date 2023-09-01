@@ -1,9 +1,10 @@
-﻿namespace Assets.Scripts.UI.Game.Control
+﻿namespace UnityLib.Core.UI
 {
     using System;
 
     using UnityEngine;
     using UnityEngine.EventSystems;
+    using UnityEngine.Serialization;
     using UnityEngine.UI;
 
     /// <summary>
@@ -12,24 +13,33 @@
     public class JoystickComponent : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler
     {
         [Header("Просмотр. Направление Joystick")]
-        [SerializeField()]
+        [SerializeField]
         private Vector2 _inputVector2;
 
         /// <summary>
         /// Задний фон джойстика.
         /// </summary>
-        [Header("Указать")]
-        public RectTransform BgRectTransform;
+        [FormerlySerializedAs("BgRectTransform")]
+        [Header("Указать. Фон джойстика.")]
+        [SerializeField]
+        private RectTransform _bgRectTransform;
 
         /// <summary>
         /// Движемый круглишок.
         /// </summary>
-        public Image TouchMarker;
+        [FormerlySerializedAs("TouchMarker")]
+        [Header("Указать. Движимый маркер.")]
+        [SerializeField]
+        private Image _touchMarker;
 
         /// <summary>
         /// Вернет вектор, который получен прямиком с джойстика.
         /// </summary>
-        public Vector2 InputVector2 { get => _inputVector2; private set => _inputVector2 = value; }
+        public Vector2 InputVector2
+        {
+            get => _inputVector2;
+            private set => _inputVector2 = value;
+        }
 
         /// <summary>
         /// Вернет вектор, который получен из <see cref="InputVector2" /> только "y" установлен в "z".
@@ -38,14 +48,15 @@
 
         public virtual void OnDrag(PointerEventData pointer)
         {
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(BgRectTransform,
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_bgRectTransform,
                     pointer.position,
                     pointer.pressEventCamera,
                     out var pos))
                 return;
 
-            var joystickBgSizeX = BgRectTransform.sizeDelta.x;
-            var joystickBgSizeY = BgRectTransform.sizeDelta.y;
+            var sizeDelta = _bgRectTransform.sizeDelta;
+            var joystickBgSizeX = sizeDelta.x;
+            var joystickBgSizeY = sizeDelta.y;
 
             // По умолчанию Pivot (0,0), но мы учитываем что этом может быть не так.
             pos.x += joystickBgSizeX;
@@ -58,7 +69,7 @@
             InputVector2 = InputVector2.magnitude > 1.0f ? InputVector2.normalized : InputVector2;
 
             // Смещаем маркер.
-            TouchMarker.rectTransform.anchoredPosition = new Vector2(
+            _touchMarker.rectTransform.anchoredPosition = new Vector2(
                 InputVector2.x * (joystickBgSizeX / 2),
                 InputVector2.y * (joystickBgSizeY / 2));
         }
@@ -71,7 +82,7 @@
         public virtual void OnPointerUp(PointerEventData eventData)
         {
             InputVector2 = Vector2.zero;
-            TouchMarker.rectTransform.anchoredPosition = Vector2.zero;
+            _touchMarker.rectTransform.anchoredPosition = Vector2.zero;
             OnPointerUpped?.Invoke();
         }
 

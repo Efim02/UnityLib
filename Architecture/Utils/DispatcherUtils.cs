@@ -32,27 +32,6 @@
         /// <summary>
         /// Вызвать действие с проверкой на исключения, в Dispatcher UI потока.
         /// </summary>
-        /// <param name="action"> Действие. </param>
-        /// <remarks> Работает с задачами и с асинхронным ожиданием. </remarks>
-        [Obsolete("Реализовать по необходимости.")]
-        public static async Task SafeInvokeAsync(Action action)
-        {
-            Dispatcher.Enqueue(() =>
-            {
-                try
-                {
-                    action?.Invoke();
-                }
-                catch (Exception exception)
-                {
-                    GameLogger.Error(exception);
-                }
-            });
-        }
-
-        /// <summary>
-        /// Вызвать действие с проверкой на исключения, в Dispatcher UI потока.
-        /// </summary>
         /// <param name="func"> Задача. </param>
         /// <typeparam name="T"> Тип. </typeparam>
         /// <remarks> Работает с задачами и с асинхронным ожиданием. Тяжеловесная работа с тасками (костыль). </remarks>
@@ -61,11 +40,16 @@
             Exception exception = null;
             Task<T> task = null;
 
+            // ReSharper disable once AsyncVoidLambda
+            // Здесь подходящая ситуация.
             Dispatcher.Enqueue(async () =>
             {
                 try
                 {
                     task = func?.Invoke();
+                    if (task == null)
+                        throw new ArgumentNullException(nameof(func));
+
                     await task;
                 }
                 catch (Exception dispatcherException)

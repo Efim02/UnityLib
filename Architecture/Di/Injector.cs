@@ -29,8 +29,11 @@
         private static readonly Dictionary<Type, object> _dictionaryScene;
 
         /// <summary>
-        /// Словарь с типами которые нужно инициализировать. <c> Ключ: тип объекта; Значение: является объектом одной сцены,
-        /// необходимые типы параметров. </c>
+        /// Словарь с типами которые нужно инициализировать.
+        /// <c>
+        /// Ключ: тип объекта; Значение: является объектом одной сцены,
+        /// необходимые типы параметров.
+        /// </c>
         /// </summary>
         private static readonly List<PickyInstance> _pickyInstances;
 
@@ -408,9 +411,7 @@
 
             var scene = existsOnScene ? "на сцену, " : string.Empty;
             GameLogger.Error($"Добавлен одиночка в игру, {scene}но не создан: {typeof(T).Name}\n" +
-                $"Не достающие параметры: {string.Join(", ", parameterNames)}");
-
-            return;
+                             $"Не достающие параметры: {string.Join(", ", parameterNames)}");
         }
     }
 }
