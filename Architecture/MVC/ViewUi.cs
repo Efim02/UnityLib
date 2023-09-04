@@ -20,6 +20,7 @@
         {
             get
             {
+                // Отлавливаем ошибки, чтобы не отвалился слой BL из-за UI.
                 try
                 {
                     return gameObject.activeSelf;
