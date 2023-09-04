@@ -20,7 +20,7 @@
         }
 
         /// <summary>
-        /// Уничтожает игровой объект или сохраняет для <see cref="UnityEngine.Object.DontDestroyOnLoad" />.
+        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
         /// </summary>
         /// <returns> TRUE - если объект сделался синглтоном, иначе - FALSE. </returns>
         public static bool DestroyOrSave<T>(GameObject gameObject)
@@ -30,7 +30,7 @@
         }
 
         /// <summary>
-        /// Уничтожает игровой объект или сохраняет для <see cref="UnityEngine.Object.DontDestroyOnLoad" />.
+        /// Уничтожает игровой объект или сохраняет для <see cref="Object.DontDestroyOnLoad" />.
         /// </summary>
         /// <param name="component"> Компонент. </param>
         /// <returns> TRUE - если объект сделался синглтоном, иначе - FALSE. </returns>
@@ -40,6 +40,17 @@
             var gameObject = component.gameObject;
 
             return DestroyOrSave(gameObject, type);
+        }
+
+        /// <summary>
+        /// Долго живущий объект.
+        /// </summary>
+        /// <param name="component"> Компонент. </param>
+        /// <returns> TRUE - если это так, иначе - FALSE. </returns>
+        public static bool IsDontDestroy(Component component)
+        {
+            var type = component.GetType();
+            return _dictionary.ContainsKey(type);
         }
 
         /// <summary>

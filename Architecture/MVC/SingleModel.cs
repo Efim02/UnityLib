@@ -5,91 +5,48 @@
     using UnityLib.Architecture.Utils;
 
     /// <summary>
-    /// Модель для синглтонов.
+    /// Модель для синглтонов, к которой могут быть подключены представления.
     /// </summary>
-    public abstract class SingleModel : IModel, IDisposable
+    public abstract class SingleModel : BaseModel, IDisposable
     {
         /// <summary>
         /// Конструктор по умолчанию.
         /// </summary>
         public SingleModel()
         {
-            ViewModelConnector.AddModel(this);
+            AutoViewModelConnector.AddModel(this);
         }
-
-        /// <summary>
-        /// Конструктор модели.
-        /// </summary>
-        /// <param name="view"> Представление. Укажите Null если привязка для единственного экземпляра. </param>
-        public SingleModel(IView view) : this()
-        {
-            View = view;
-        }
-
-        /// <summary>
-        /// Это модель одной сцены.
-        /// </summary>
-        public virtual bool IsSceneModel => false;
-
-        /// <summary>
-        /// Представление.
-        /// </summary>
-        public IView View { get; }
 
         /// <summary>
         /// Уничтожить объект, чтобы создать новые его копии.
         /// </summary>
         public void Dispose()
         {
+            AutoViewModelConnector.RemoveModel(this);
             Destroy();
-            ViewModelConnector.RemoveModel(this);
         }
 
         /// <inheritdoc />
-        public void SetVisibleView(bool visible)
+        public override void SetVisibleView(bool visible)
         {
-            if (View != null)
-                View.IsVisible = visible;
-
-            if (!ViewModelConnector.TryGetViews(this, out var views))
-                return;
-
-            foreach (var view in views)
+            if (AutoViewModelConnector.TryGetViews(this, out var views))
             {
-                view.IsVisible = visible;
+                DispatcherUtils.SafeInvoke(() => views.ForEach(view =>
+                {
+                    // Сначала обновить данные представления, потом отобразить.
+                    view.UpdateView(this);
+                    view.IsVisible = visible;
+                }));
             }
         }
 
         /// <summary>
         /// Обновить представление или представления.
         /// </summary>
-        public void UpdateView()
+        public override void UpdateView()
         {
-            DispatcherUtils.SafeInvoke(() =>
-            {
-                if (View != null)
-                {
-                    View.UpdateView(this);
-                    return;
-                }
-
-                if (!ViewModelConnector.TryGetViews(this, out var views))
-                    return;
-
-                foreach (var view in views)
-                {
-                    view.UpdateView(this);
-                }
-            });
-        }
-
-        /// <summary>
-        /// Сделает видимым и обновит представление.
-        /// </summary>
-        public void VisibleAndUpdateView()
-        {
-            UpdateView();
-            SetVisibleView(true);
+            if (AutoViewModelConnector.TryGetViews(this, out var views))
+                DispatcherUtils.SafeInvoke(() => views.ForEach(view => view.UpdateView(this)));
         }
 
         /// <summary>
