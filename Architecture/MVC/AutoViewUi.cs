@@ -18,7 +18,7 @@
         /// </summary>
         public virtual bool IsNeedUpdateView => true;
 
-        protected void Start()
+        protected void OnEnable()
         {
             InitializeView();
         }

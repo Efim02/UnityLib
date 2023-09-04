@@ -84,6 +84,15 @@
         }
 
         /// <summary>
+        /// Сделает видимым и обновит представление.
+        /// </summary>
+        public void VisibleAndUpdateView()
+        {
+            UpdateView();
+            SetVisibleView(true);
+        }
+
+        /// <summary>
         /// Уничтожить модель.
         /// </summary>
         /// <remarks> Реализовать, если необходим такой callback. </remarks>
