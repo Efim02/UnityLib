@@ -4,8 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    using UnityEditor;
-
     using UnityEngine;
 
     using UnityLib.Architecture.Log;
@@ -16,29 +14,19 @@
     /// <summary>
     /// Связыватель конкретной одной модели и ее представлений.
     /// </summary>
-    internal static class AutoViewModelConnector
+    internal class AutoViewModelLinker
     {
-        // TODO: Соединить словари.
-
         /// <summary>
-        /// Словарь со списками моделей; используем для инициализации представлений.
+        /// Словарь, где ключ - тип модели, а значение - модель и связанные представления.
         /// </summary>
-        private static readonly Dictionary<Type, SingleModel> _modelsDictionary;
-
-        /// <summary>
-        /// Словарь с представлениями для вида.
-        /// </summary>
-        private static readonly Dictionary<Type, List<IAutoView>> _viewsByModel;
-        
-        // TODO: Добавить вызовы внутри SceneChanger
+        private readonly Dictionary<Type, AutoViewModelLink> _dictionary;
 
         /// <summary>
         /// Связыватель конкретной одной модели и ее представлений.
         /// </summary>
-        static AutoViewModelConnector()
+        public AutoViewModelLinker()
         {
-            _viewsByModel = new Dictionary<Type, List<IAutoView>>();
-            _modelsDictionary = new Dictionary<Type, SingleModel>();
+            _dictionary = new Dictionary<Type, AutoViewModelLink>();
         }
 
         /// <summary>
@@ -46,38 +34,44 @@
         /// </summary>
         /// <typeparam name="TModel"> Тип модели. </typeparam>
         /// <param name="model"> Модель. </param>
-        public static void AddModel<TModel>(TModel model) where TModel : SingleModel
+        public void AddModel<TModel>(TModel model) where TModel : SingleModel
         {
             var modelType = model.GetType();
-            if (_modelsDictionary.ContainsKey(modelType))
+            if (_dictionary.ContainsKey(modelType))
                 GameLogger.Warning($"Модель {modelType.Name} уже зарегистрирована; синглтон.");
 
-            _modelsDictionary.Add(modelType, model);
+            _dictionary.Add(modelType, new AutoViewModelLink(modelType, model));
         }
 
         /// <summary>
-        /// Добавляет все представления сцены.
+        /// Проверяет все представления сцены.
         /// </summary>
-        public static void AddSceneViews()
+        /// <remarks> Обнаруженные представления на сцене добавляются в список представлений. </remarks>
+        public void CheckSceneViews()
         {
+            CheckPreviousSceneViews();
+
             var allObjects = Object.FindObjectsOfType<GameObject>();
             var autoViews = allObjects.SelectMany(o => o.GetComponents<IAutoView>()).ToList();
 
             autoViews.ForEach(AddView);
         }
-        
+
         /// <summary>
         /// Удалить модель.
         /// </summary>
         /// <typeparam name="TModel"> Тип модели. </typeparam>
         /// <param name="model"> Модель. </param>
-        public static void RemoveModel<TModel>(TModel model) where TModel : SingleModel
+        public void RemoveModel<TModel>(TModel model) where TModel : SingleModel
         {
-            // TODO: Удаляем ссылки на представления и сами игровые объекты представлений.
             var modelType = model.GetType();
-            _modelsDictionary.Remove(modelType);
+
+            var autoViewModelLink = _dictionary[modelType];
+            autoViewModelLink.Views.ForEach(a => a.Destruct());
+
+            _dictionary.Remove(modelType);
         }
-        
+
         /// <summary>
         /// Получить представления, для модели.
         /// </summary>
@@ -85,7 +79,7 @@
         /// <param name="views"> Представления. </param>
         /// <param name="model"> Модель. </param>
         /// <returns> TRUE - если есть представления для модели. </returns>
-        public static bool TryGetViews<TModel>(TModel model, out List<IView> views) where TModel : IModel
+        public bool TryGetViews<TModel>(TModel model, out List<IAutoView> views) where TModel : IModel
         {
             var modelType = model.GetType();
             views = GetViews(modelType);
@@ -97,7 +91,7 @@
         /// Добавить представление.
         /// </summary>
         /// <param name="autoView"> Представление. </param>
-        private static void AddView(IAutoView autoView)
+        private void AddView(IAutoView autoView)
         {
             var modelType = autoView.ModelType;
             var viewTypeName = autoView.GetType().Name;
@@ -107,8 +101,8 @@
                 GameLogger.Error($"В представлении {viewTypeName}, не указан тип модели");
                 return;
             }
-            
-            if (!_modelsDictionary.ContainsKey(modelType))
+
+            if (!_dictionary.ContainsKey(modelType))
             {
                 GameLogger.Error($"Не было добавлено модели для представления {viewTypeName}");
                 return;
@@ -121,19 +115,35 @@
         }
 
         /// <summary>
+        /// Проверяет все представления сцены, предыдущей сцены.
+        /// </summary>
+        /// <remarks>
+        /// Для случаев, когда существует синглтон живущий "игру",
+        /// но связанные представления могут столько не жить.
+        /// </remarks>
+        private void CheckPreviousSceneViews()
+        {
+            foreach (var autoViewModelLink in _dictionary.Values)
+            {
+                var destroyedViews = autoViewModelLink.Views
+                    .Where(v => MonoUtils.IsDestroyed(v.GameObject))
+                    .ToList();
+
+                destroyedViews.ForEach(v => autoViewModelLink.Views.Remove(v));
+            }
+        }
+
+        /// <summary>
         /// Получить представления для модели.
         /// </summary>
         /// <param name="modelType"> Тип модели. </param>
         /// <returns> Представления. </returns>
-        private static List<IAutoView> GetViews(Type modelType)
+        private List<IAutoView> GetViews(Type modelType)
         {
-            if (_viewsByModel.TryGetValue(modelType, out var views))
-                return views;
-
-            views = new List<IAutoView>();
-            _viewsByModel.Add(modelType, views);
-
-            return views;
+            return _dictionary.TryGetValue(modelType, out var autoViewModelLink)
+                ? autoViewModelLink.Views
+                : throw new Exception(
+                    "Получение представления для модели должно происходить только после инициализации модели");
         }
 
         /// <summary>
@@ -141,10 +151,10 @@
         /// </summary>
         /// <param name="autoView"> Представление. </param>
         /// <returns> Модель на которую было привязано представление. </returns>
-        private static void InitializeView(IAutoView autoView)
+        private void InitializeView(IAutoView autoView)
         {
             var modelType = autoView.ModelType;
-            if (!_modelsDictionary.TryGetValue(modelType, out var model))
+            if (!_dictionary.TryGetValue(modelType, out var autoViewModelLink))
             {
                 GameLogger.Error($"Не удалось установить модель {modelType.Name} " +
                                  $"для представления {autoView.GetType().Name}.");
@@ -154,17 +164,7 @@
             autoView.Initialize();
 
             if (autoView.IsVisible)
-                autoView.UpdateView(model);
-        }
-
-        /// <summary>
-        /// Удалить представление.
-        /// </summary>
-        /// <param name="autoView"> Представление. </param>
-        private static void RemoveView<TModel>(IAutoView autoView) where TModel : IModel
-        {
-            var views = GetViews(typeof(TModel));
-            views.Remove(autoView);
+                autoView.UpdateView(autoViewModelLink.Model);
         }
     }
 }

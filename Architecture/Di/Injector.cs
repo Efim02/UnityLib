@@ -193,16 +193,53 @@
             where TSource : class
         {
             if (source is null)
-            {
-                RebindSingleton<TSource, TSource>(existsOnScene);
-                return;
-            }
+                throw new ArgumentException("Одиночка равен null", nameof(source));
 
             if (ContainsTypeInDictionaries<TSource>(ref existsOnScene))
                 throw new ErrorFoundException($"Зависимость типа {typeof(TSource).Name} уже зарегистрирована.");
 
             // Не удалять object, чтобы был контроль (ключа) типа абстракции.
             AddSourceInDictionaries(typeof(TSource), source, existsOnScene);
+        }
+
+        /// <summary>
+        /// Зарегистрировать одиночку.
+        /// </summary>
+        /// <typeparam name="TSource"> Тип по который получим. </typeparam>
+        /// <typeparam name="TInterface"> Тип по которому будем запрашивать. </typeparam>
+        /// <param name="source"> Что вернется. Если NULL создадим через Activator. </param>
+        /// <param name="existsOnScene"> Существует одну сцену. </param>
+        public static void RebindSingleton<TInterface, TSource>(TSource source, bool existsOnScene)
+            where TSource : class, TInterface
+        {
+            if (source is null)
+                throw new ArgumentException("Одиночка равен null", nameof(source));
+
+            if (ContainsTypeInDictionaries<TInterface>(ref existsOnScene))
+                throw new ErrorFoundException($"Зависимость типа {typeof(TSource).Name} уже зарегистрирована.");
+
+            // Не удалять object, чтобы был контроль (ключа) типа абстракции.
+            AddSourceInDictionaries(typeof(TInterface), source, existsOnScene);
+        }
+
+        /// <summary>
+        /// Зарегистрировать одиночку.
+        /// </summary>
+        /// <typeparam name="TSource"> Тип по который получим. </typeparam>
+        /// <param name="abstractionType"> Тип абстракции </param>
+        /// <param name="source"> Что вернется. Если NULL создадим через Activator. </param>
+        /// <param name="existsOnScene"> Существует одну сцену. </param>
+        public static void RebindSingleton<TSource>(Type abstractionType, TSource source, bool existsOnScene)
+            where TSource : class
+        {
+            if (source is null)
+                throw new ArgumentException("Одиночка равен null", nameof(source));
+
+            if (ContainsTypeInDictionaries(abstractionType, ref existsOnScene))
+                throw new ErrorFoundException($"Зависимость типа {abstractionType.Name} уже зарегистрирована.");
+
+            // Не удалять object, чтобы был контроль (ключа) типа абстракции.
+            AddSourceInDictionaries(abstractionType, source, existsOnScene);
         }
 
         /// <summary>
@@ -249,6 +286,42 @@
             var createdPickyInstance = new PickyInstance(existsOnScene, interfaceType, sourceType, parameters);
             _pickyInstances.Add(createdPickyInstance);
             CheckPickyTypes();
+        }
+
+        /// <summary>
+        /// Попробует получить объект.
+        /// </summary>
+        /// <typeparam name="T">Тип.</typeparam>
+        /// <param name="singleton">Синглтон.</param>
+        /// <returns>TRUE - если имеется объект, иначе - FALSE.</returns>
+        public static bool TryGet<T>(out T singleton) where T : class
+        {
+            if (Exists<T>())
+            {
+                singleton = Get<T>();
+                return true;
+            }
+
+            singleton = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Попробует получить объект сцены.
+        /// </summary>
+        /// <typeparam name="T">Тип.</typeparam>
+        /// <param name="sceneObject">Синглтон сцены.</param>
+        /// <returns>TRUE - если имеется объект сцены, иначе - FALSE.</returns>
+        public static bool TryGetSceneObject<T>(out T sceneObject) where T : class
+        {
+            if (ExistsSceneObject<T>())
+            {
+                sceneObject = GetSceneObject<T>();
+                return true;
+            }
+
+            sceneObject = null;
+            return false;
         }
 
         /// <summary>
@@ -321,7 +394,18 @@
         /// <returns> TRUE - если есть. </returns>
         private static bool ContainsTypeInDictionaries<T>(ref bool existsOnScene)
         {
-            return _dictionary.ContainsKey(typeof(T)) || (existsOnScene && _dictionaryScene.ContainsKey(typeof(T)));
+            return ContainsTypeInDictionaries(typeof(T), ref existsOnScene);
+        }
+
+        /// <summary>
+        /// Проверить наличие типа в словарях.
+        /// </summary>
+        /// <param name="type"> Тип. </param>
+        /// <param name="existsOnScene"> Проверять ли в словаре сцены. </param>
+        /// <returns> TRUE - если есть. </returns>
+        private static bool ContainsTypeInDictionaries(Type type, ref bool existsOnScene)
+        {
+            return _dictionary.ContainsKey(type) || (existsOnScene && _dictionaryScene.ContainsKey(type));
         }
 
         /// <summary>

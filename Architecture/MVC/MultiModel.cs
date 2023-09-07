@@ -5,7 +5,7 @@
     /// <summary>
     /// Модель, которая существует не единственном экземпляре.
     /// </summary>
-    public class MultiModel : BaseModel
+    public abstract class MultiModel : BaseModel
     {
         /// <summary>
         /// Модель, которая существует не единственном экземпляре.

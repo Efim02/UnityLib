@@ -2,12 +2,19 @@
 {
     using System;
 
+    using UnityEngine;
+
     /// <summary>
     /// Представление для модели, которое автоматически подключается к модели.
     /// </summary>
     /// <remarks> Нужно для поиска по компонентам. </remarks>
     public interface IAutoView : IView
     {
+        /// <summary>
+        /// Игровой объект.
+        /// </summary>
+        GameObject GameObject { get; }
+
         /// <summary>
         /// Тип модели, к которому привязали представление.
         /// </summary>

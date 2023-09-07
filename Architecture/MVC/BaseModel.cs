@@ -1,7 +1,5 @@
 ﻿namespace UnityLib.Architecture.MVC
 {
-    using System;
-
     /// <summary>
     /// Базовая модель.
     /// </summary>
