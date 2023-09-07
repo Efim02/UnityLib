@@ -16,6 +16,10 @@
     /// <typeparam name="TLevel"> Тип перечисления уровней. </typeparam>
     public abstract class BaseLevelChanger<TLevel> : ILevelChanger where TLevel : Enum
     {
+        // TODO: Переделать чтобы не нужно было указывать тип уровня, он нам не нужен.
+
+        private AutoViewModelLinker AutoViewModelLinker => Injector.Get<AutoViewModelLinker>();
+
         /// <summary>
         /// Список наименований перечислений.
         /// </summary>
@@ -56,20 +60,11 @@
         /// <param name="gameLevel"> Уровень. </param>
         public void LoadLevel<TLevelEnum>(TLevelEnum gameLevel) where TLevelEnum : Enum
         {
-            try
-            {
-                Injector.ClearSceneInstances();
-                ViewModelConnector.ClearSceneDictionary();
-
-                LevelLoading?.Invoke();
-            }
-            catch (Exception exception)
-            {
-                GameLogger.Error(exception, "Ошибка загрузки уровня.");
-            }
-
             var gameIndex = _levelEnumNames.IndexOf(gameLevel.ToString());
-            SceneManager.LoadScene(gameIndex);
+            if (gameIndex == -1)
+                throw new Exception($"Перечисление {typeof(TLevel)} не содержит {gameLevel}");
+
+            LoadLevel(gameIndex);
         }
 
         /// <inheritdoc />
@@ -78,7 +73,6 @@
             try
             {
                 Injector.ClearSceneInstances();
-                ViewModelConnector.ClearSceneDictionary();
 
                 LevelLoading?.Invoke();
 
@@ -86,7 +80,7 @@
             }
             catch (Exception exception)
             {
-                GameLogger.Error(exception, "Ошибка загрузки уровня.");
+                GameLogger.Error(exception, "Ошибка загрузки уровня");
             }
         }
 
@@ -105,6 +99,8 @@
 
             GameLogger.Info($"Изменена сцена: {PreviousLevel} -> {CurrentLevel}");
             LevelLoaded?.Invoke();
+
+            AutoViewModelLinker.CheckSceneViews();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace UnityLib.Architecture.MVC
 {
     using System;
-
+    using UnityLib.Architecture.Di;
     using UnityLib.Architecture.Utils;
 
     /// <summary>
@@ -9,12 +9,14 @@
     /// </summary>
     public abstract class SingleModel : BaseModel, IDisposable
     {
+        private AutoViewModelLinker AutoViewModelLinker => Injector.Get<AutoViewModelLinker>();
+
         /// <summary>
         /// Конструктор по умолчанию.
         /// </summary>
         public SingleModel()
         {
-            AutoViewModelConnector.AddModel(this);
+            AutoViewModelLinker.AddModel(this);
         }
 
         /// <summary>
@@ -22,14 +24,14 @@
         /// </summary>
         public void Dispose()
         {
-            AutoViewModelConnector.RemoveModel(this);
+            AutoViewModelLinker.RemoveModel(this);
             Destroy();
         }
 
         /// <inheritdoc />
         public override void SetVisibleView(bool visible)
         {
-            if (AutoViewModelConnector.TryGetViews(this, out var views))
+            if (AutoViewModelLinker.TryGetViews(this, out var views))
             {
                 DispatcherUtils.SafeInvoke(() => views.ForEach(view =>
                 {
@@ -45,7 +47,7 @@
         /// </summary>
         public override void UpdateView()
         {
-            if (AutoViewModelConnector.TryGetViews(this, out var views))
+            if (AutoViewModelLinker.TryGetViews(this, out var views))
                 DispatcherUtils.SafeInvoke(() => views.ForEach(view => view.UpdateView(this)));
         }
 
