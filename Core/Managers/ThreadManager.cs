@@ -48,8 +48,8 @@
             Injector.RebindSingleton(this, false);
             DontDestroyOnLoad(gameObject);
 
-            var levelChanger = Injector.Get<ILevelChanger>();
-            levelChanger.LevelLoading += () => _sceneDateTime = DateTime.UtcNow;
+            var sceneLoader = Injector.Get<ISceneLoader>();
+            sceneLoader.LevelLoading += () => _sceneDateTime = DateTime.UtcNow;
         }
 
         private void Update()
