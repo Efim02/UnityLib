@@ -1,7 +1,5 @@
 ﻿namespace UnityLib.Architecture.MVC
 {
-    using System;
-
     using UnityEngine;
 
     using UnityLib.Architecture.Di;
@@ -12,6 +10,7 @@
     /// <summary>
     /// Абстрактный класс для запуска приложения.
     /// </summary>
+    /// <remarks> Инициализация программы происходит единожды. </remarks>
     public abstract class BaseProgram : MonoBehaviour
     {
         private static bool _isInitialized;
@@ -29,6 +28,7 @@
                     return;
 
                 Injector.RebindSingleton<AutoViewModelLinker>(false);
+                Injector.RebindSingleton<ISceneLoader, SceneLoader>(false);
 
                 AwakeProgram();
                 ValidateAwakeProgram();
@@ -53,7 +53,7 @@
         /// <summary>
         /// Инициализация программы.
         /// </summary>
-        /// <remarks> Callback.<br/>Для работы программы необходимо зарегистрировать: <see cref="ILevelChanger" />. </remarks>
+        /// <remarks> Callback.<br /> </remarks>
         protected virtual void AwakeProgram()
         {
         }
@@ -71,12 +71,6 @@
         /// </summary>
         private void ValidateAwakeProgram()
         {
-            if (!Injector.TryGet<ILevelChanger>(out var levelChanger) ||
-                !levelChanger.GetType().BaseType!.Name.Contains("BaseLevelChanger"))
-            {
-                throw new Exception(
-                    $"Не инициализирован {nameof(ILevelChanger)}, необходимо проверить наследника \"ILevelChanger\"");
-            }
         }
     }
 }
