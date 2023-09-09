@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Core.Utils
+﻿namespace UnityLib.Architecture.Utils
 {
     using System;
 
