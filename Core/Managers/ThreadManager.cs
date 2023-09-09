@@ -8,8 +8,8 @@
 
     using UnityLib.Architecture.Di;
     using UnityLib.Architecture.Log;
+    using UnityLib.Architecture.Models.Scene;
     using UnityLib.Architecture.Utils;
-    using UnityLib.Core.Models.Level;
 
     /// <summary>
     /// Синхронизатор с потоком Unity.

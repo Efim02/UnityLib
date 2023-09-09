@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Core.Models.Level
+﻿namespace UnityLib.Architecture.Models.Scene
 {
     using System;
 

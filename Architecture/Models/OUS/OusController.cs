@@ -1,4 +1,4 @@
-﻿namespace UnityLib.Architecture.OUS
+﻿namespace UnityLib.Architecture.Models.OUS
 {
     using System.Collections.Generic;
     using System.Linq;

@@ -4,8 +4,8 @@
 
     using UnityLib.Architecture.Di;
     using UnityLib.Architecture.Log;
-    using UnityLib.Core.Models.Level;
-    using UnityLib.Core.Utils;
+    using UnityLib.Architecture.Models.Scene;
+    using UnityLib.Architecture.Utils;
 
     /// <summary>
     /// Абстрактный класс для запуска приложения.
