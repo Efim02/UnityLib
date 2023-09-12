@@ -6,6 +6,7 @@
 
     using UnityEngine;
 
+    using UnityLib.Architecture.Extensions;
     using UnityLib.Architecture.Log;
     using UnityLib.Architecture.Utils;
 
@@ -51,10 +52,30 @@
         {
             CheckPreviousSceneViews();
 
-            var allObjects = Object.FindObjectsOfType<GameObject>();
-            var autoViews = allObjects.SelectMany(o => o.GetComponents<IAutoView>()).ToList();
+            var allObjects = Object.FindObjectsOfType<GameObject>(true);
+            var autoViews = allObjects.SelectMany(o => o.GetComponents<IAutoView>())
+                .Where(c => c != null)
+                .ToList();
 
-            autoViews.ForEach(AddView);
+            var validAutoViews = autoViews
+                .Where(av => _dictionary.TryGetValue(av.ModelType, out _))
+                .ToList();
+
+            var nonValidAutoViews = autoViews.Except(validAutoViews)
+                .Select(av => $"{av.Component.name}:{av.ModelType}")
+                .ToList();
+
+            if (nonValidAutoViews.Any())
+            {
+                GameLogger.Error("Для объектов представлений не зарегистрированы модели: " +
+                                 $"{nonValidAutoViews.ToTextByComma()}");
+            }
+
+            // Добавляем представления, которые еще не добавлены для модели,
+            // таким образом фильтруем DontDestroy объекты.
+            validAutoViews.Where(av => !_dictionary[av.ModelType].Views.Contains(av))
+                .ToList()
+                .ForEach(AddView);
         }
 
         /// <summary>
@@ -126,7 +147,7 @@
             foreach (var autoViewModelLink in _dictionary.Values)
             {
                 var destroyedViews = autoViewModelLink.Views
-                    .Where(v => MonoUtils.IsDestroyed(v.GameObject))
+                    .Where(v => MonoUtils.IsDestroyed(v.Component))
                     .ToList();
 
                 destroyedViews.ForEach(v => autoViewModelLink.Views.Remove(v));
@@ -140,10 +161,13 @@
         /// <returns> Представления. </returns>
         private List<IAutoView> GetViews(Type modelType)
         {
-            return _dictionary.TryGetValue(modelType, out var autoViewModelLink)
-                ? autoViewModelLink.Views
-                : throw new Exception(
-                    "Получение представления для модели должно происходить только после инициализации модели");
+            if (_dictionary.TryGetValue(modelType, out var autoViewModelLink))
+                return autoViewModelLink.Views;
+
+            GameLogger.Error(
+                "Получение представления для модели должно происходить только после инициализации модели");
+
+            return new List<IAutoView>();
         }
 
         /// <summary>

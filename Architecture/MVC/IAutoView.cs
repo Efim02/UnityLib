@@ -11,9 +11,9 @@
     public interface IAutoView : IView
     {
         /// <summary>
-        /// Игровой объект.
+        /// Компонент игрового объекта.
         /// </summary>
-        GameObject GameObject { get; }
+        Component Component { get; }
 
         /// <summary>
         /// Тип модели, к которому привязали представление.

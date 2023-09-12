@@ -24,7 +24,7 @@
         }
 
         /// <inheritdoc />
-        public GameObject GameObject => gameObject;
+        public Component Component => this;
 
         /// <inheritdoc />
         public Type ModelType => typeof(TModel);

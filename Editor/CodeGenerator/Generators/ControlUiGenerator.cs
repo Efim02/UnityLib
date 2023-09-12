@@ -12,6 +12,7 @@
 
     using UnityEngine;
 
+    using UnityLib.Architecture.Extensions;
     using UnityLib.Architecture.Log;
     using UnityLib.Architecture.MVC;
     using UnityLib.Core.Extensions;
@@ -71,7 +72,7 @@
             }
 
             GameLogger.Info($"Генерировать недостающие контроллеры Ui: {abstractions.Count}.\n" +
-                            $"{abstractions.ToText()}");
+                            $"{abstractions.ToTextWithHeader()}");
 
             Generate(abstractions);
         }

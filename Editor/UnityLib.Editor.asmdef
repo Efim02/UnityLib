@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "UnityLib.Core",
-        "UnityLib.Architecture"
+        "UnityLib.Architecture",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

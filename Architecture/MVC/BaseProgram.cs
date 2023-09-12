@@ -44,8 +44,6 @@
 
                 StartProgram();
                 Injector.RebindSingleton(GetType(), this, false);
-                GameLogger.Info($"Зарегистрирована программа {GetType()}");
-                // TODO: проверить что за тип, должен быть наследник.
                 _isInitialized = true;
             });
         }

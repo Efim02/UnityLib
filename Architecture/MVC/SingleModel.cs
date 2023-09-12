@@ -9,6 +9,11 @@
     /// </summary>
     public abstract class SingleModel : BaseModel, IDisposable
     {
+        /// <summary>
+        /// Уничтожена ли модель.
+        /// </summary>
+        public bool IsDestroyed { get; private set; }
+        
         private AutoViewModelLinker AutoViewModelLinker => Injector.Get<AutoViewModelLinker>();
 
         /// <summary>
@@ -26,17 +31,23 @@
         {
             AutoViewModelLinker.RemoveModel(this);
             Destroy();
+            IsDestroyed = true;
         }
 
         /// <inheritdoc />
         public override void SetVisibleView(bool visible)
         {
+            if (IsDestroyed)
+                return;
+
             if (AutoViewModelLinker.TryGetViews(this, out var views))
             {
                 DispatcherUtils.SafeInvoke(() => views.ForEach(view =>
                 {
                     // Сначала обновить данные представления, потом отобразить.
-                    view.UpdateView(this);
+                    if (visible)
+                        view.UpdateView(this);
+                    
                     view.IsVisible = visible;
                 }));
             }
@@ -47,6 +58,9 @@
         /// </summary>
         public override void UpdateView()
         {
+            if (IsDestroyed)
+                return;
+            
             if (AutoViewModelLinker.TryGetViews(this, out var views))
                 DispatcherUtils.SafeInvoke(() => views.ForEach(view => view.UpdateView(this)));
         }
