@@ -7,12 +7,23 @@
     using UnityLib.Architecture.Di;
     using UnityLib.Architecture.Log;
     using UnityLib.Architecture.MVC;
+    using UnityLib.Architecture.Utils;
 
     /// <summary>
     /// Загрузчик сцены.
     /// </summary>
     internal class SceneLoader : ISceneLoader
     {
+        /// <summary>
+        /// Текущая сцена.
+        /// </summary>
+        private SceneInfo _currentScene;
+
+        /// <summary>
+        /// Предыдущая сцена.
+        /// </summary>
+        private SceneInfo _previousScene;
+
         /// <summary>
         /// Утилита для работы с загрузкой уровней.
         /// </summary>
@@ -24,7 +35,7 @@
         private AutoViewModelLinker AutoViewModelLinker => Injector.Get<AutoViewModelLinker>();
 
         /// <inheritdoc />
-        public int CurrentSceneIndex { get; private set; }
+        public int CurrentSceneIndex => _currentScene.Index;
 
         /// <inheritdoc />
         public TScene GetCurrentScene<TScene>() where TScene : struct
@@ -79,7 +90,7 @@
         }
 
         /// <inheritdoc />
-        public int PreviousSceneIndex { get; private set; }
+        public int PreviousSceneIndex => _previousScene?.Index ?? 0;
 
         /// <summary>
         /// Получает сцену по индексу.
@@ -106,13 +117,17 @@
         /// <param name="next"> Текущая. </param>
         private void SceneChanged(Scene previous, Scene next)
         {
-            PreviousSceneIndex = CurrentSceneIndex;
-            CurrentSceneIndex = next.buildIndex;
+            ExecuteUtils.SafeExecute(() =>
+            {
+                _previousScene = _currentScene;
+                _currentScene = new SceneInfo(next);
 
-            GameLogger.Info($"Изменена сцена: {previous.name} -> {next.name}");
-            LevelLoaded?.Invoke();
+                GameLogger.Info(
+                    $"Изменена сцена: {_previousScene?.Name} -> {next.name}");
+                LevelLoaded?.Invoke();
 
-            AutoViewModelLinker.CheckSceneViews();
+                AutoViewModelLinker.CheckSceneViews();
+            });
         }
     }
 }

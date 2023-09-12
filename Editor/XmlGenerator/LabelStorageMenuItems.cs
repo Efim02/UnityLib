@@ -4,11 +4,14 @@
     using System.IO;
     using System.Linq;
 
+    using TMPro;
+
     using UnityEditor;
 
     using UnityEngine;
     using UnityEngine.SceneManagement;
 
+    using UnityLib.Architecture.Extensions;
     using UnityLib.Architecture.Log;
     using UnityLib.Core.Constants;
     using UnityLib.Core.Extensions;
@@ -62,14 +65,19 @@
         private static void CheckFile(string fileName)
         {
             // INFUT: Добавить поиск по файлам кода
+            // INFUT: Добавить кнопку для проверки по всем уровням (но кажется так нельзя).
+            // INFUT: Добавить дублирования ключа и значения в словарь ru.
             var editorKeyLabels = new List<Scene> { SceneManager.GetActiveScene() }
                 .SelectMany(scene => scene.GetRootGameObjects())
                 .Select(go => go.transform)
                 .SelectMany(TransformExtensions.GetAllFromHierarchy)
                 .Select(go => go.GetComponent<LocalizationComponent>())
                 .Where(go => go != null)
-                .Select(lc => lc.LabelKey)
+                .Select(lc => lc.GetComponent<TMP_Text>())
+                // INFUT: Добавить вывод в лог с пустыми текстами
+                .Select(t => t.text)
                 .ToList();
+            
 
             var path = Path.Combine(_localization, fileName);
             if (!File.Exists(path))
@@ -77,8 +85,6 @@
                 GameLogger.Warning($"Отсутствует файл -{path}-");
                 return;
             }
-
-            GameLogger.Info("Проверка файла надписей - ");
 
             var labelStorageDto = XmlUtils.Deserialize<LabelStorageDto>(path);
             var notContainedKey = new List<string>();
@@ -94,7 +100,7 @@
             if (notContainedKey.Any())
             {
                 GameLogger.Error($"Словарь {fileName} не валиден, нет совпадения в надписях. " +
-                                 $"В словарь добавлены надписи:\n{notContainedKey.ToText()}");
+                                 $"В словарь добавлены надписи:\n{notContainedKey.ToTextWithHeader()}");
                 labels.AddRange(notContainedKey.Distinct().Select(k => new LabelDto { Key = k }));
                 XmlUtils.Serialize(labelStorageDto, path);
                 return;
@@ -104,7 +110,7 @@
             if (notValidLabels.Any())
             {
                 GameLogger.Warning($"Словарь {fileName} имеет не заполненные значения:\n " +
-                                   $"{notValidLabels.ToText(l => l.Key)}");
+                                   $"{notValidLabels.ToTextWithHeader(l => l.Key)}");
                 return;
             }
 
